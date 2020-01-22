@@ -1,0 +1,18 @@
+PC
+--------------------------------------------------------------------------------
+- Chrome Extension
+- Android app
+- Encrypt account table using master passphrase
+- Windows version
+- Write tests
+- Add features to QT tool
+- Script for logging in into host machien
+- Simplify Secret setting for user
+- Mark whitespaces in account / hostname to avoid mistakes
+
+AVR
+-------------------------------------------------------------------------------
+- Simplify schematic (change reset pin to IO, use cheaper/easier to obtain parts)
+- Set Lock Fuses
+- Acquire Open Source USB ID
+- Casing!

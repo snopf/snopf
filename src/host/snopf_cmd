@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd ~/.snopf/snopf_cmd/
+./snopf_cmd "$@"

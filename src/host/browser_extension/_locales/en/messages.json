@@ -1,0 +1,16 @@
+{
+  "extensionName": {
+    "message": "snopf",
+    "description": "Name of the extension."
+  },
+
+  "extensionDescription": {
+    "message": "Requests passwords.",
+    "description": "Description of the add-on."
+  },
+  
+  "menuItemRequestPassword": {
+    "message": "Request password",
+    "description": "Start password request with current url."
+  }
+}
