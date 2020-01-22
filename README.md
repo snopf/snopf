@@ -212,7 +212,7 @@ All fields are UTF-8 encoded strings, including *password_iteration*, without an
 If the *password_iteration* field is 0 it will be omitted.
 
 ## Hardware
-You can find a KiCad project for snopf in the schematic subfolder and also a PDF of the current schematic here (TODO link). The KiCad project also includes a PCB layout for a SMD version.
+You can find a KiCad project for snopf in the schematic subfolder and also a PDF of the current schematic [here](https://github.com/snopf/snopf/blob/master/readme/schematic.pdf). The KiCad project also includes a PCB layout for a SMD version.
 
 Bill of materials for the SMD version:
 * ATTINY85-20SU SO(1)
