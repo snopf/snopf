@@ -316,5 +316,9 @@ There is no warranty for data security and integrity or security issues of any k
 
 You are free to use it and copy it but it comes **without any guarantees**.
 
+## Links
+
+* snopf makes use of the excellent [V-USB driver](https://www.obdev.at/products/vusb/index.html)
+
 ## License
 All code and schematics are licensed under GNU General Public License (GPL) Version 2, see file License.txt.
