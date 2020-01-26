@@ -16,7 +16,7 @@
 int main(void)
 {
     usbInit();
-    io_bttn_deactivate();
+    io_init();
     // enforce re-enumeration
     usbDeviceDisconnect();
     _delay_ms(500);

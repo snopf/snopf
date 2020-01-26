@@ -6,19 +6,26 @@
 
 #include <avr/io.h>
 
-// Some routines for using the Button / LED IO pin
+// Some macros and functions for reading the button status
+// and setting the LED pin
 
-// Only IO pin left
-#define IO_BUTTON_PIN PB0
+// We use the reset pin PB5 as button input
+#define IO_BUTTON_PIN PB5
+
+// PB0 is the LED pin
+#define IO_LED_PIN PB0
 
 // Evaluates to 1 if button is pressed (set to GND)
 #define IO_BUTTON_PRESSED (!(PINB & (1 << IO_BUTTON_PIN)))
 
-// Activate the button
-void io_bttn_activate(void);
+// Switch LED on (setting output low)
+#define IO_LED_ON (PORTB &= ~(1 << IO_LED_PIN))
 
-// Deactivate the button
-void io_bttn_deactivate(void);
+// Switch LED off (setting output high)
+#define IO_LED_OFF (PORTB |= (1 << IO_LED_PIN))
+
+// Set LED pin as output, Button pin as input
+void io_init(void);
 
 // Wait the given number of seconds for the user to press the button
 // Returns 1 if the user pressed the button, else 0

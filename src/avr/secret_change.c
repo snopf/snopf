@@ -48,10 +48,10 @@ static void inline csecret_wait_for_user(void)
     static const PROGMEM char str_ready[] = "ready\n";
     uint8_t num_btt_pressed = 0;
     for (uint8_t i = 0; i < 100; i++) {
-        io_bttn_deactivate();
+        IO_LED_ON;
         poll_delay_ms(100);
 
-        io_bttn_activate();
+        IO_LED_OFF;
         poll_delay_ms(100);
         
         if (IO_BUTTON_PRESSED) {
@@ -64,7 +64,6 @@ static void inline csecret_wait_for_user(void)
         // we wait 2 * 100 ms, so for 5 seconds we have to have 25 * 2 loop
         // iterations where the button was pressed
         if (num_btt_pressed >= 25) {
-            io_bttn_deactivate();
             // Store the sent secret in the temporary eeprom array first
             // and advance one step in the secret changing routine
             for (i = 0; i < SECRET_LENGTH; i++) {
@@ -82,7 +81,6 @@ static void inline csecret_wait_for_user(void)
 
     // User failed to press the button so we will abort the secret changing
     // routine
-    io_bttn_deactivate();
     csecret_state = CSECRET_STATE_IDLE;
 }
 
@@ -110,9 +108,9 @@ static void inline csecret_process_challenge_result(void)
 
     // Blink LED four times to indicate success
     for (uint8_t i = 0; i < 4; i++) {
-        io_bttn_activate();
+        IO_LED_ON;
         poll_delay_ms(200);
-        io_bttn_deactivate();
+        IO_LED_OFF;
         poll_delay_ms(200);
     }
 }

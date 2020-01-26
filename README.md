@@ -219,7 +219,7 @@ All fields are UTF-8 encoded strings, including *password_iteration*, without an
 If the *password_iteration* field is 0 it will be omitted.
 
 ## Hardware
-You can find a KiCad project for snopf in the schematic subfolder and also a PDF of the current schematic [here](https://github.com/snopf/snopf/blob/master/readme/schematic.pdf). The KiCad project also includes a PCB layout for a SMD version.
+You can find a KiCad project for snopf in the `hardware` subfolder and also a PDF of the current schematic [here](https://github.com/snopf/snopf/blob/master/readme/schematic.pdf). The KiCad project also includes a PCB layout for a SMD version.
 
 Bill of materials for the SMD version:
 * ATTINY85-20SU SO(1)
@@ -316,7 +316,6 @@ The Android App is located at `src/host/android` as an project for `androidstudi
 line tool)
 * More user friendly secret setting like dice rolls or the like
 * Write a startup script to use snopf for logging in into your computer
-* Simplify schematic by using the reset pin as I/O and use different, more standard component
 * Acquire a open source USB product ID
 * encrypt / decrypt account table with master passphrase
 * Share account table between devices
@@ -331,4 +330,4 @@ You are free to use it and copy it but it comes **without any guarantees**.
 * snopf makes use of the excellent [V-USB driver](https://www.obdev.at/products/vusb/index.html)
 
 ## License
-All code and schematics are licensed under GNU General Public License (GPL) Version 2, see file License.txt.
+All code and schematics / hardware layouts are licensed under GNU General Public License (GPL) Version 2, see file License.txt.

@@ -189,7 +189,7 @@ AVRDUDE_MCU = t85
 AVRDUDE_PORT = usb
 # AVRDUDE_PORT = /dev/ttyUSB1
 
-AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex -U lfuse:w:0xff:m -U hfuse:w:0xdc:m -U efuse:w:0xff:m 
+AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex -U lfuse:w:0xff:m -U hfuse:w:0x5c:m -U efuse:w:0xff:m 
 AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
 
 
