@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">snopf</string>
+    <string name="settings">Settings</string>
+    <string name="info">Info</string>
+    <string name="password_settings">Password Settings</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+</resources>

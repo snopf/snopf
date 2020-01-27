@@ -32,13 +32,14 @@ snopf is an improvement over these managers because an attacker can't access you
 
 ## Existing Tools
 
-So far there are three tools that can send requests to the device:
+So far there are four tools that can send requests to the device:
 
 1. `snopf_cmd`, a command line tool
 2. `snopf_manager`, a graphical user interface
-3. a browser extension for firefox (and soon also Google chrome)
+3. A browser extension for firefox (and soon also Google chrome)
+4. An Android App
 
-For advise on how to build these tools see section *Build your own*.
+For advise on how to build these tools see section *Building the firmware and Host Software*.
 
 `snopf_manager` and the browser extension make use of an *account table* which stores information about your logins on your computer. Every entry in this table has four fields:
 
@@ -130,6 +131,12 @@ $ snopf_cmd hostname account 1 --password_length=40
 snopf_manager is first and foremost a GUI tool to manage the account table. Here you can create, delete and change entries. It uses the same account table as the browser extension. It is also used to make password requests outside of the browser. All unsaved changes to the account table will appear red to prevent changes by accident.
 
 ![snopf_manager](readme/snopf_manager.png)
+
+
+### snopf Android App
+There is an app for Android phones that can make password requests. It works fairly well for single requests but so far doesn't have access to the account table.
+
+![snopf_android](readme/screenshot_android.jpg)
 
 ## Restoring passwords
 
@@ -298,8 +305,10 @@ about:debugging#/runtime/this-firefox
 ```
 into the adress bar and and clicking *Load Temporary Add-on...*.
 
+### Android App
+The Android App is located at `src/host/android` as an project for `androidstudio` and can be build and applied to an Android phone using the same.
+
 ## TODO
-* An android app (in progress)
 * Windows version
 * More tests, especially for browser extension
 * Casing for the USB device
@@ -310,6 +319,7 @@ line tool)
 * Simplify schematic by using the reset pin as I/O and use different, more standard component
 * Acquire a open source USB product ID
 * encrypt / decrypt account table with master passphrase
+* Share account table between devices
 
 ## Disclaimer
 There is no warranty for data security and integrity or security issues of any kind. Care has been taken to make this a device that increases your security, however security bugs are possible.

@@ -1,14 +1,18 @@
 PC
 --------------------------------------------------------------------------------
 - Chrome Extension
-- Android app
 - Encrypt account table using master passphrase
 - Windows version
 - Write tests
 - Add features to QT tool
-- Script for logging in into host machien
+- Script for logging in into host machine
 - Simplify Secret setting for user
 - Mark whitespaces in account / hostname to avoid mistakes
+
+Android
+-------------------------------------------------------------------------------
+- Add account table
+- Synch account table with PC
 
 AVR
 -------------------------------------------------------------------------------
