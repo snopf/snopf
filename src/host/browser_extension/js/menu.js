@@ -113,7 +113,8 @@ function activate_gui(hostname, username_guess) {
         if (username_guess in account_table[hostname]) {
             $('#input_account').val(username_guess);
         } else {
-            $('#input_account').val(account_table[hostname][0]);   
+            var first_hostname = Object.keys(account_table[hostname])[0];
+            $('#input_account').val(first_hostname);   
         }
     }
     
