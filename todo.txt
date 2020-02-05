@@ -20,3 +20,8 @@ AVR
 - Set Lock Fuses
 - Acquire Open Source USB ID
 - Casing!
+
+
+Bugs:
+----------------------------------------------------------------------
+- must initialize options page for browser extension to make requests
