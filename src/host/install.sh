@@ -13,6 +13,7 @@ cp -rf dist/pc/snopf_manager ~/.snopf
 # cp dist/pc/snopf_password_request ~/.snopf
 
 echo "Creating links in ~/.local/bin.."
+mkdir -p ~/.local/bin
 cp -f snopf_cmd ~/.local/bin/
 cp -f snopf_manager ~/.local/bin/
 # ln -s ~/.snopf/snopf_password_request ~/.local/bin/snopf_password_request
