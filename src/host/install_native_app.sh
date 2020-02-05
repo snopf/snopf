@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "Creating directory ~/.snopf/snopf_browser_driver"
+mkdir -p ~/.snopf/snopf_browser_driver
+
 echo "Copying browser driver to ~/.snopf"
 cp -r dist/pc/snopf_browser_driver ~/.snopf
 
