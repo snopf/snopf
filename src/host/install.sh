@@ -4,7 +4,8 @@ echo "Removing unnecessary data from binary folders.."
 ./clean_up_pyinstaller.sh
 
 echo "Creating dir ~/.snopf.."
-mkdir -p ~/.snopf
+mkdir -p ~/.snopf/snopf_cmd
+mkdir -p ~/.snopf/snopf_manager
 
 echo "Copying data to ~/.snopf.."
 cp -rf dist/pc/snopf_cmd ~/.snopf
