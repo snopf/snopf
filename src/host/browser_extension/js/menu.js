@@ -24,7 +24,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 var account_table = {};
 
 // Options for the extension
-options = {}
+var options;
 
 // Get the currently selected hostname
 function get_hostname() { return $('#input_hostname').val(); }
@@ -193,12 +193,16 @@ function ask_device_plugged_in() {
 // Get the current options
 function get_options() {
     // Set to automatically hit enter if selected in settings
-    chrome.storage.sync.get(null, function(items) {
-        options = items
-        // Continue init process by asking bg script for pin
-        // after we received our options
-        ask_for_pin();
-    });
+    chrome.storage.sync.get({
+        'save_info': true,
+        'save_pin_active_session': true,
+        'hit_enter': false},
+        function(items) {
+            options = items;
+            // Continue init process by asking bg script for pin
+            // after we received our options
+            ask_for_pin();
+        });
 }
 
 // Ask the background script for the pin
