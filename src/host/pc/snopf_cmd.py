@@ -291,7 +291,13 @@ class Prompt(cmd.Cmd):
             return
         
         print('Device sent the correct password.')
-        print('The new secret on the device is now set!')
+        print('The new secret on the device is now set!\n\n')
+        # Repeat the mnemonic for clarity
+        print('***************************************************************')
+        print('The mnemonic for the new secret is:')
+        print(' '.join(m))
+        print('***************************************************************')
+
         usb_comm.send_empty_message()
                 
     def do_set_keyboard_delay(self, args):
