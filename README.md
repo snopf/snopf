@@ -223,22 +223,21 @@ You can find a KiCad project for snopf in the `hardware` subfolder and also a PD
 
 Bill of materials for the SMD version:
 * ATTINY85-20SU SO(1)
-* Resistor 10k 0603 (3)
-* Resistor 220R 0603 (2)
+* Resistor 10k 0603 (1)
+* Resistor 220R 0603 (1)
 * Resistor 1k 0603 (1)
 * Resistor 1k5 0603 (1)
-* Resistor 68R (2)
+* Resistor 68R 0603 (2)
 * Capacitor 18pF 0603 (2)
 * Capacitor 100n 0603 (1)
-* Tantalum Capacitor 4u7 EIA-3216-18 (1)
-* Crystal 12 Mhz 4 Pin 12.000000-MJ (1)
-* LED green 0603 (1)
+* Capacitor 4u7 0805 (1)
+* Crystal 12 Mhz 4 Pin (1)
 * LED red 0603 (1)
 * USB connector (1)
 * Zener Diode 3,6V Mini Melf (2)
-* Button Schurter 1241.1618.XX (1)
-* NPN transistor 2N2222A SOT-23 (1)
+* Button Panasonic EVQQ2 (1)
 
+There are links for Mouser parts that work for the PCB layout to be found in the KiCad schematic.
 
 ## Building the Firmware and Host Software
 
