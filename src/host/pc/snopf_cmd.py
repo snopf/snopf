@@ -142,7 +142,8 @@ class Prompt(cmd.Cmd):
     def do_request(self, args):
         """
         Request a password from the device using the given string argument(s)
-        and the set values for hit_enter and password length.
+        and the set values for hit_enter and password length. Multiple strings
+        will be concatenated to one.
         """
         send_message(args.split(), self.pw_length, self.hit_enter)
         
