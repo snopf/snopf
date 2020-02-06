@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if (( $EUID == 0 )); then
+    echo "Do not run this as root"
+    exit
+fi
+
 echo "Removing unnecessary data from binary folders.."
 ./clean_up_pyinstaller.sh
 

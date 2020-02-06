@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if (( $EUID == 0 )); then
+    echo "Do not run this as root"
+    exit
+fi
+
 echo "Creating directory ~/.snopf/snopf_browser_driver"
 mkdir -p ~/.snopf/snopf_browser_driver
 
