@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'new_entry_dialog.ui',
 # licensing of 'new_entry_dialog.ui' applies.
 #
-# Created: Tue Jan 21 13:52:23 2020
+# Created: Thu Feb  6 21:32:35 2020
 #      by: pyside2-uic  running on PySide2 5.12.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -67,7 +67,7 @@ class Ui_NewEntryDialog(object):
         self.gridLayout_3.addWidget(self.buttonBox, 1, 0, 1, 1)
 
         self.retranslateUi(NewEntryDialog)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), NewEntryDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("rejected()"), NewEntryDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(NewEntryDialog)
