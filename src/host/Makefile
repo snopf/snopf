@@ -1,4 +1,4 @@
-.PHONY: browser_extension pc install
+.PHONY: browser_extension pc
 
 all:	browser_extension pc
 
