@@ -68,7 +68,7 @@ U 1 1 5AECB068
 P 7650 3575
 F 0 "SW1" H 7700 3675 50  0000 L CNN
 F 1 "User Button" H 7650 3515 50  0000 C CNN
-F 2 "Button_Switch_SMD:SW_SPST_EVQQ2" H 7650 3775 50  0001 C CNN
+F 2 "snopf_footprints:SW_SPST_EVQQ2" H 7650 3775 50  0001 C CNN
 F 3 "https://www.mouser.de/datasheet/2/315/sw_lt_eng_6s_th-1289042.pdf" H 7650 3775 50  0001 C CNN
 F 4 "https://www.mouser.de/ProductDetail/667-EVQ-Q2B03W" H 7650 3575 50  0001 C CNN "Link"
 	1    7650 3575

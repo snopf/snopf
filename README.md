@@ -2,7 +2,7 @@
 
 ## What is snopf?
 
-![snopf device](readme/device_cropped_logo.jpg)
+![snopf device](readme/snopf_header.jpg)
 
 snopf is a very simple, yet effective and easy to use USB password tool. The snopf USB device creates a unique and strong password for every service from the same 128 bit secret which never leaves the token.
 
@@ -238,6 +238,10 @@ Bill of materials for the SMD version:
 * Button Panasonic EVQQ2 (1)
 
 There are links for Mouser parts that work for the PCB layout to be found in the KiCad schematic.
+
+## Casing
+A 3D printable casing can be found at `hardware/casing` both as a FreeCAD file and as four STEP files (bottom, top, button and a cap for the USB plug). The button is designed as a silicone button so that the diffuse LED light can been seen through it.
+The dimensions of the casing are 41.9 x 19.4 x 11 mm.
 
 ## Building the Firmware and Host Software
 
