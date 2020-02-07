@@ -66,24 +66,36 @@ def error(err_msg):
     logging.error(err_msg)
     send_msg('error', err_msg)
     
-account_table_path = app_path + '/../snopf_manager/account_table.json'
-
-account_table = {}
-try:
-    with open(account_table_path) as f:
-        account_table = json.load(f)
-except FileNotFoundError:
-    error('Password file not found')
-
-def save_account_table():
-    '''
-    Try to save the current account table to the account table file
-    '''
+def load_account_table(account_table_path):
+    try:
+        with open(account_table_path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        error('Password file not found')
+        return {}
+    
+def insert_entry(entry, account_table):
+    '''Insert entry in given account_table dict'''
+    if not entry['hostname'] in account_table:
+        account_table[entry['hostname']] = {}
+        
+    assert not entry['account'] in account_table[entry['hostname']]
+    
+    account_table[entry['hostname']][entry['account']] = {
+        'password_length': entry['password_length'],
+        'password_iteration': entry['password_iteration']
+        }
+        
+def save_new_entry(entry, account_table_path):
+    ''' Save new entry in account table file'''
     f = open(account_table_path, 'r+')
     try:
         fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
         return False
+    # Get the current account table, other programs may have changed it
+    account_table = load_account_table(account_table_path)
+    insert_entry(entry, account_table)
     f.seek(0)
     json.dump(account_table, f)
     f.truncate()
@@ -91,24 +103,13 @@ def save_account_table():
     f.close()
     return True
 
-def set_new_account(msg):
-    '''
-    Add new account to the account table if necessary and return True
-    if a new account has been added.
-    '''
-    if not msg['hostname'] in account_table:
-        account_table[msg['hostname']] = {}
+def entry_is_new(entry, account_table):
+    return (not (entry['hostname'] in account_table)
+            or not entry['account'] in account_table[entry['hostname']])
     
-    if not msg['account'] in account_table[msg['hostname']]:
-        account_table[msg['hostname']][msg['account']] = {
-            'password_length': msg['password_length'],
-            'password_iteration': msg['password_iteration']
-            }
-        return True
-    
-    return False
-     
 def main_loop():
+    account_table_path = app_path + '/../snopf_manager/account_table.json'
+    account_table = load_account_table(account_table_path)
     
     try:        
         while True:
@@ -124,8 +125,10 @@ def main_loop():
                 msg['password_iteration'] = int(msg['password_iteration'])
                 msg['password_length'] = int(msg['password_length'])
                 if msg['save_new_info']:
-                    if set_new_account(msg):
-                        if save_account_table():
+                    if entry_is_new(msg, account_table):
+                        if save_new_entry(msg, account_table_path):
+                            account_table = load_account_table(
+                                account_table_path)
                             send_msg('get_account_table', account_table)
                         else:
                             error('Cannot lock account table file')
