@@ -146,14 +146,13 @@ void sha256_calculate_hash(uint8_t hash[32], const uint8_t secret[16],
 #endif
     }
 
-    static const PROGMEM uint32_t FF32 = 0x000000ff;
     // Shift hash to little endian and store it in the char array
     for (uint8_t i = 0; i < 4; i++) {
         for (uint8_t k = 0, j = 0; k < 8; k++, j += 4) {
 #ifdef TEST_NO_MCU
-            hash[i + j] = (h[k] >> (24 - i * 8)) & FF32;
+            hash[i + j] = (h[k] >> (24 - i * 8));
 #else
-            hash[i + j] = (h[k] >> (24 - i * 8)) & pgm_read_dword(&FF32);
+            hash[i + j] = (h[k] >> (24 - i * 8));
 #endif
         }
     }
