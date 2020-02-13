@@ -82,7 +82,8 @@ void sha256_calculate_hash(uint8_t hash[32], const uint8_t secret[16],
     for (uint8_t i = 4, j = 0; i < 8; i++, j += 4) {
         w[i] = (((uint32_t)message[j]) << 24)
                | (((uint32_t)message[j + 1]) << 16)
-               | (((uint16_t)message[j + 2]) << 8) | (message[j + 3]);
+               | (((uint16_t)message[j + 2]) << 8)
+               | (message[j + 3]);
     }
 
     // Add the single one bit in big endian convention
