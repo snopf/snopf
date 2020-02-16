@@ -14,6 +14,6 @@
  */
 
 // Z85 encode the sha256_hash chunk of 4 bytes length
-void z85_encode_chunk(char z85_encoded[5], const uint8_t sha256_hash[4]);
+void z85_encode_chunk(char z85_encoded[5], const uint8_t* chunk);
 
 #endif
