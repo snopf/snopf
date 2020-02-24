@@ -38,6 +38,27 @@ function check_new_info_save()
     return $('#checkbox_save_info').prop('checked');
 }
 
+// If the account input changed we might have to update the
+// current password settings (length + iteration)
+function update_password_settings()
+{
+    hostname = get_hostname();
+    account = get_account();
+    if ((hostname in self.account_table)
+        && (account in self.account_table[hostname])) {
+        $('#password_length').val(
+            account_table[hostname][account]['password_length']);
+        $('#password_iteration').val(
+            account_table[hostname][account]['password_iteration']);    
+    }
+    else {
+        // Reset to standard values if the account name is unknown
+        $('#password_length').val(40);
+        $('#password_iteration').val(0);
+    }
+}
+    
+
 // Changes in account / hostname field should update the read data
 function init_gui_change_events() {
     // If the hostname changes, we have to rebuild the popup
@@ -45,24 +66,8 @@ function init_gui_change_events() {
         fill_out_accounts($(this).val());
     });
     
-    // If the account input changed we might have to update the
-    // current password settings (length + iteration)
-    $('#input_account').change(function() {
-        hostname = get_hostname();
-        account = get_account();
-        if ((hostname in self.account_table)
-            && (account in self.account_table[hostname])) {
-            $('#password_length').val(
-                account_table[hostname][account]['password_length']);
-            $('#password_iteration').val(
-                account_table[hostname][account]['password_iteration']);    
-        }
-        else {
-            // Reset to standard values if the account name is unknown
-            $('#password_length').val(40);
-            $('#password_iteration').val(0);
-        }
-    });
+    // Update settings according to selected account
+    $('#input_account').change(update_password_settings);
 
     // Activate the account selection change event
     $('#select_account').change(function() {
@@ -95,6 +100,18 @@ function fill_out_accounts(hostname)
                 $('<option>', {value: account, text : account}))
         })
     }
+    // Select the given username_guess if it's in the accounts list
+    // else we'll just take the first account we know
+    if (account_table.hasOwnProperty(hostname)) {
+        if (username_guess in account_table[hostname]) {
+            $('#input_account').val(username_guess);
+        } else {
+            var first_hostname = Object.keys(account_table[hostname])[0];
+            $('#input_account').val(first_hostname);   
+        }
+    }
+    // We might have to set password settings for the selected hostname + account
+    update_password_settings();
 }
 
 // Activate the interface after everything has been initialized properly
@@ -106,17 +123,6 @@ function activate_gui(hostname, username_guess) {
     $('.gui_disabled_default').prop('disabled', false);
     
     fill_out_accounts(hostname);
-    
-    // Select the given username_guess if it's in the accounts list
-    // else we'll just take the first account we know
-    if (account_table.hasOwnProperty(hostname)) {
-        if (username_guess in account_table[hostname]) {
-            $('#input_account').val(username_guess);
-        } else {
-            var first_hostname = Object.keys(account_table[hostname])[0];
-            $('#input_account').val(first_hostname);   
-        }
-    }
     
     // Set the 'Save info' checkbox only if it says so in the extensions
     // settings
