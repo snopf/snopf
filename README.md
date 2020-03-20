@@ -314,7 +314,6 @@ The Android App is located at `src/host/android` as an project for `androidstudi
 ## TODO
 * Windows version
 * More tests, especially for browser extension
-* Casing for the USB device
 * Make the QT tool more feature complete (allow same functionality as in the command
 line tool)
 * More user friendly secret setting like dice rolls or the like
