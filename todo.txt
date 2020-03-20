@@ -16,6 +16,5 @@ Android
 
 AVR
 -------------------------------------------------------------------------------
-- Simplify schematic (change reset pin to IO, use cheaper/easier to obtain parts)
 - Set Lock Fuses
 - Acquire Open Source USB ID
