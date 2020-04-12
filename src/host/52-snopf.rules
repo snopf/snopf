@@ -1,4 +1,4 @@
 # Put this file into /etc/udev/rules.d
 
-SUBSYSTEM=="usb", ATTR{idVendor}=="16c0", ATTR{idProduct}=="27db", ATTRS{serial}=="snopf.com:snopf", MODE="0660", GROUP="plugdev", # TAG+="uaccess", TAG+="udev-acl"
+SUBSYSTEM=="usb", ATTR{idVendor}=="16c0", ATTR{idProduct}=="27db", ATTRS{serial}=="snopf.com:snopf", MODE="0660", GROUP="plugdev", TAG+="uaccess", TAG+="udev-acl"
 #KERNEL=="hidraw*", ATTR{idVendor}=="16c0", ATTR{idProduct}=="27db", ATTRS{serial}=="snopf.com:snopf", MODE="0660", GROUP="plugdev", TAG+="uaccess", TAG+="udev-acl"
