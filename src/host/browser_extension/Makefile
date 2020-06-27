@@ -18,5 +18,4 @@ firefox:	$(dist_path)firefox/firefox.zip
 $(dist_path)firefox/firefox.zip:	$(all_deps)	$(firefox_deps)
 	mkdir -p $(dist_path)firefox
 	cp manifest_firefox.json manifest.json
-	cp com.snopf.snopf_firefox.json	$(dist_path)firefox/com.snopf.snopf.json
 	zip -r -FS $@ * -x $(excludes)

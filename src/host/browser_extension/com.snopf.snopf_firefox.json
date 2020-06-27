@@ -1,7 +1,0 @@
-{
-    "name": "com.snopf.snopf",
-    "description": "USB driver for the Snopf device",
-    "path": "~/.snopf/snopf_browser_driver/snopf_browser_driver",
-    "type": "stdio",
-    "allowed_extensions": ["snopf@snopf.com"]
-}

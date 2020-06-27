@@ -8,7 +8,7 @@
 
 function dbg_message(msg)
 {
-    console.log('SNOPF_CONTENT: ' + msg);
+    console.log('SNOPF-CONTENT: ' + msg);
 }
 
 var debugging = false;
@@ -126,9 +126,9 @@ function refocus_password_field()
 function message_handler(msg)
 {
     dbg_message('Menu -> Content: ' + JSON.stringify(msg));
-    if (msg.cmd == 'website_info') {
+    if (msg.cmd == 'website-info') {
         port.postMessage(
-            {cmd: 'website_info',
+            {cmd: 'website-info',
              msg: {hostname: hostname, username: username}});
     } 
     else if (msg.cmd == 'refocus') {
@@ -144,5 +144,3 @@ function connected(p) {
 chrome.runtime.onConnect.addListener(connected);
 
 find_website_info();
-
-dbg_message('Ready');

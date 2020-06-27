@@ -32,7 +32,7 @@ def generate_salt():
     return os.urandom(SALT_SIZE)
 
 def key_from_passphrase(passphrase, salt):
-    '''Get master key  and salt from master passphrase'''
+    '''Get master key from master passphrase'''
     if len(salt) != SALT_SIZE:
         raise ValueError('Expected salt of 16 bytes length')
     num_runs = 100000

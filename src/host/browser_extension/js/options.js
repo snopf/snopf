@@ -2,12 +2,9 @@
 // License: GNU GPL v2 (see License.txt)
 
 // Gui elements
-check_save_info = document.getElementById('save_info');
-
-check_save_pin_active_sessions = document.getElementById(
-    'save_pin_active_session');
-
-check_hit_enter = document.getElementById('hit_enter')
+check_add_new_entries = document.getElementById('add-new-entries');
+check_hit_enter = document.getElementById('hit-enter')
+websocket_port_input = document.getElementById('websocket-port')
 
 // Show a 'Options saved' message
 function show_saved_message() 
@@ -23,29 +20,28 @@ function show_saved_message()
 function save_options()
 {
     chrome.storage.sync.set({
-        save_info: check_save_info.checked,
-        save_pin_active_session: check_save_pin_active_sessions.checked,
-        hit_enter: check_hit_enter.checked
+        add_new_entries: check_add_new_entries.checked,
+        hit_enter: check_hit_enter.checked,
+        websocket_port: websocket_port_input.value
     }, show_saved_message);
 }
 
 // Set the GUI elements corresponding to the loaded options
 function set_current_choice(items)
 {
-    check_save_info.checked = items.save_info;
-    check_save_pin_active_sessions.checked = items.save_pin_active_session;
-    hit_enter: check_hit_enter.checked = items.hit_enter;
+    check_add_new_entries.checked = items.add_new_entries;
+    check_hit_enter.checked = items.add_new_entries;
+    websocket_port_input.value = items.websocket_port
 }
 
 // Restore the options from the HDD
 function restore_options() {
     chrome.storage.sync.get({
-        'save_info': true,
-        'save_pin_active_session': true,
-        'hit_enter': false},
+        'add_new_entries': true,
+        'hit_enter': false,
+        'websocket_port': 60100},
         set_current_choice);
 }
 
 document.addEventListener('DOMContentLoaded', restore_options);
-document.getElementById('save').addEventListener('click',
-                                                 save_options);
+document.getElementById('save').addEventListener('click', save_options);

@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
 
-<title>Password request</title>
-<!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+<title>Snopf</title>
 <link rel="stylesheet" href="../css/snopf.css">
+<link rel="stylesheet" href="../js/jquery-ui-1.12.1/jquery-ui.css">
 </head>
 
 <body>
 
-<div class="w3-container snopf_main" id="device_not_connected_notice">
-    <h3>Device not connected.</h3>
+<div class="w3-container snopf_main" id="no-snopf-server-notice">
+    <h3>No connection to snopf server</h3>
+</div>
+
+<div class="w3-container snopf_main" id="device-not-connected-notice" hidden>
+    <h3>Device not connected</h3>
 </div>
 
 
@@ -19,74 +23,39 @@
 
  <div class="w3-container snopf_main header">
     <img src="../icon/icon_32.png" alt="logo" />
-    <h2>snopf</h2>
+    <h2>Snopf</h2>
 </div>
-
-<!--  <div class="w3-container snopf_main header">\ -->
-<!--     <img src="../icon/icon_144.png" alt="logo" /> -->
-<!--     <h2>snopf</h2> -->
-<!-- </div> -->
 
 <div class="w3-container w3-padding-large">
 
     <p>
-    <label class="snopf_text" disabled><b>Pin</b></label>
-    <input class="w3-input w3-border w3-light-grey"
-    type="password" id="input_pin" autofocus></p>
+    <label class="snopf_text"><b>Service</b></label>
+    <input class="w3-input w3-border w3-light-grey ui-widget"
+    type="text" id="input-service">
+    </p>
     
     <p>
     <label class="snopf_text"><b>Account</b></label>
-    <input class="w3-input w3-border w3-light-grey gui_disabled_default"
-    type="text" id="input_account" placeholder="default" disabled>
-    </p>
-
-    <p>
-    <select class="w3-border w3-light-grey w3-input gui_disabled_default"
-    id="select_account" color=gray>
-        <option value="" class="select_placeholder" selected
-        id="select_account_option">
-        Select known account</option>
-    </select> 
+    <input class="w3-input w3-border w3-light-grey"
+    type="text" id="input-account">
     </p>
     
     <p>
-    <label class="snopf_text"><b>URL</b></label>
-    <input class="w3-input w3-border w3-light-grey gui_disabled_default"
-    type="text" id="input_hostname">
+    <button class="w3-padding-large w3-block w3-btn snopf_main w3-small" id="button-ok" type="submit" disabled>Request</button>
     </p>
     
-    <p>
-    <button class="w3-padding-large w3-block w3-btn snopf_main 
-    w3-small" id="button_ok" type="submit">Request</button>
+    <p style="text-align:center">
+    <label class="snopf_text" id='new-entry-warning' hidden><b>Create New Entry</b></label>
     </p>
     
-    <p>
-    <label class="container">Save information
-    <input type="checkbox" id="checkbox_save_info" checked="checked">
-    <span class="checkmark"></span>
-    </label>
+    <p style="text-align:center">
+    <label class="snopf_text" id='no-such-entry-warning' hidden><b>No Matching Entry</b></label>
     </p>
     
-</div>
-    
-<button type="button" class="w3-padding-large w3-block w3-btn
-               snopf_main w3-small collapsible">Advanced Settings</button>
-                   
-<div class="w3-container w3-padding-large hidden_content">
-    <p>
-    <label class="snopf_text"><b>Password Length</b></label>
-    <input class="w3-input w3-border w3-light-grey gui_disabled_default"
-        type="number" id="password_length"
-        min="6" max="40" value="40" disabled></p> 
-
-    <p>
-    <label class="snopf_text"><b>Password Iteration</b></label>
-    <input class="w3-input w3-border w3-light-grey gui_disabled_default"
-           type="number" id="password_iteration" min="0" value="0"
-           disabled></p>
 </div>
 
 <script src="../js/jquery-3.3.1.min.js"></script>
+<script src="../js/jquery-ui-1.12.1/jquery-ui.js" ></script>
 <script src="../js/menu.js"></script>
 
 </form>
