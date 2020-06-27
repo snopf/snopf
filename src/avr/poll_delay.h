@@ -6,10 +6,6 @@
 
 #include <stdint.h>
 
-/*
- * Delay routines that regularly call usbPoll
- */
-
 // Idle for the given number of milliseconds and call usbPoll regularly
 void poll_delay_ms(uint16_t ms);
 

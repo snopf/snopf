@@ -8,68 +8,47 @@
 Test routines to check if the AVR is working as expected
 
 NOTE The avr code should be compiled using the
-    TEST_PASSWORD_GENERATION_DANGEROUS
+    AVR_TESTING_NO_USER_INPUT
 flag to disable the button pressing on the device
 """
 
-# TODO Secret change test
 
-import usb_comm
-import password_generator as pg
+from usb_comm import *
+from password_generator import *
 import os
 import sys
 import random
 
 # Standard secret for all new devices
-STANDARD_SECRET = b'0123456789012345'
+STANDARD_SECRET = b'\x00' * 32
 
-def test_password_request(request_message, secret=STANDARD_SECRET,
-                          pw_length=pg.MIN_PW_LENGTH, hit_enter=True):
-    usb_comm.send_standard_pw_request(request_message, 
-                                      hit_enter=hit_enter,
-                                      pw_length=pw_length)
-    recv_pw = input()
-    print(pg.generate_password(secret, request_message, pw_length))
-    assert recv_pw == pg.generate_password(secret, request_message, pw_length)
+def test_random_password_requests(num):
     
-def test_random_password_requests(num_runs, secret=STANDARD_SECRET,
-                                  hit_enter=True, pw_length='random'):
-    if pw_length == 'random':
-        pw_length = [random.randint(pg.MIN_PW_LENGTH, pg.MAX_PW_LENGTH)
-                     for i in range(num_runs)]
-    
-    else:
-        assert usb_comm.MIN_PW_LENGTH <= pw_length <= usb_comm.MAX_PW_LENGTH
-        pw_length = [pw_length] * num_runs
+    dev = get_standard_device()
+    for i in range(num):
+        req_msg = os.urandom(16)
+        length = random.randint(MIN_PW_LENGTH, MAX_PW_LENGTH)
         
-    messages = [os.urandom(16) for i in range(num_runs)]
-    
-    [test_password_request(messages[i], secret, pw_length[i], hit_enter)
-     for i in range(num_runs)]
-    
-    print('Test passed with %d random requests.' % num_runs)
-    
-def test_usb_message_lengths():
-    # A complete raw message is 18 byte long
-    # (ctrl byte + password length byte + 16 byte message)
-    
-    # Test message that is too short
-    usb_comm.send_message(bytes(17))
-    ask_result()
-    print('Device should be shutdown now.')
-    input('Reinsert for next test and press enter.')
-    
-    # Test message that is too long
-    usb_comm.send_message(bytes(19))
-    ask_result()
-    print('Device should be shutdown now.')
-    input('Reinsert for next test and press enter.')
-    
-    # Test message that could overflow the buffer
-    usb_comm.send_message(bytes(4**64))
-    ask_result()
-    print('Device should be shutdown now.')
-    print('All tests done.')
+        kmap = keymaps[random.choice([k for k in keymaps.keys()])]
+        rules = random.randint(0, 63)
+        while not check_rules_valid(rules, kmap):
+            rules = random.randint(0, 63)
+        
+        rules += PW_RULE_HIT_ENTER
+        
+        appendix = [0xff, 0xff, 0xff]
+        for k in range(random.randint(0,3)):
+            appendix[k] = random.randint(0, 63)
+        
+        exp = get_mapped_password(STANDARD_SECRET, req_msg, length,
+                                  rules, kmap)
+        append_keys(exp, appendix)
+        print(map_to_characters(exp))
+        msg = build_request(req_msg, length, rules, appendix, kmap)
+        send_message(dev, msg)
+        inp = input()
+        assert inp == map_to_characters(exp)
+        
     
 if __name__ == '__main__':
     print('Running %d tests:' % int(sys.argv[1]))

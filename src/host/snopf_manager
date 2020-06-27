@@ -1,4 +1,0 @@
-#!/bin/bash
-
-cd ~/.snopf/snopf_manager 
-./snopf_manager "$@"

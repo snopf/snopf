@@ -16,11 +16,14 @@ void io_init(void)
     IO_LED_OFF;
 }
 
-uint8_t io_wait_for_user_bttn(uint8_t num_sec)
+int8_t io_wait_for_user_bttn(void)
 {
+#ifdef AVR_TESTING_NO_USER_INPUT
+    return 1;
+#endif
     IO_LED_ON;
     
-    for (uint8_t i = 0; i < num_sec * 10; i++) {
+    for (uint8_t i = 0; i < 100; i++) {
         poll_delay_ms(100);
         if (IO_BUTTON_PRESSED) {
             IO_LED_OFF;
@@ -28,6 +31,30 @@ uint8_t io_wait_for_user_bttn(uint8_t num_sec)
         }
     }
     // The user didn't press the button in time
+    IO_LED_OFF;
+    return 0;
+}
+
+int8_t io_wait_for_user_bttn_hold(void)
+{
+#ifdef AVR_TESTING_NO_USER_INPUT
+    return 1;
+#endif
+    IO_LED_ON;
+    uint8_t pressed = 0;
+    for (uint8_t i = 0; i < 200; i++) {
+        IO_LED_TOGGLE;
+        poll_delay_ms(100);
+        if (IO_BUTTON_PRESSED) {
+            pressed++;
+        } else {
+            pressed = 0;
+        }
+        if (pressed >= 50) {
+            IO_LED_OFF;
+            return 1;
+        }
+    }
     IO_LED_OFF;
     return 0;
 }

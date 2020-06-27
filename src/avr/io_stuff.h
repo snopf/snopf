@@ -24,14 +24,24 @@
 // Switch LED off (setting output high)
 #define IO_LED_OFF (PORTB |= (1 << IO_LED_PIN))
 
+// Toggle LED
+#define IO_LED_TOGGLE (PORTB ^= (1 << IO_LED_PIN))
+
 // Set LED pin as output, Button pin as input
 void io_init(void);
 
-// Wait the given number of seconds for the user to press the button
+// Wait 10 seconds for the user to press a button and set the signal LED on
 // Returns 1 if the user pressed the button, else 0
-uint8_t io_wait_for_user_bttn(uint8_t num_sec);
+// Used for standard requests
+int8_t io_wait_for_user_bttn(void);
+
+// Wait 20 seconds for the user to hold the button for at least 5 seconds
+// The user LED blinks during the wait period
+// Returns 1 if the user pressed the button, else 0
+// Used for sensible requests like eeprom write requests
+int8_t io_wait_for_user_bttn_hold(void);
 
 // Shut down the device and just keep blinking the LED slowly
-void io_failure_shutdown(void);
+void io_failure_shutdown(void) __attribute__((noreturn));
 
 #endif

@@ -1,0 +1,98 @@
+[
+    {
+        "account": "account",
+        "service": "service",
+        "password_iteration": 0,
+        "password_length": 40,
+        "master_key": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=\n",
+        "request": "ZjsKEgPomlAf8XlT0Ni16A==\n"
+    },
+    {
+        "account": "account",
+        "service": "service1",
+        "password_iteration": 0,
+        "password_length": 40,
+        "master_key": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=\n",
+        "request": "cqX1OBsXvXW3dcTI6QOZlA==\n"
+    },
+    {
+        "account": "account1",
+        "service": "service",
+        "password_iteration": 0,
+        "password_length": 40,
+        "master_key": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=\n",
+        "request": "3EXSbNGsL07gw1qpdzREMg==\n"
+    },
+    {
+        "account": "account",
+        "service": "service",
+        "password_iteration": 0,
+        "password_length": 40,
+        "master_key": "CxTVAaWURCoBxoWVQbyz6BZNGD0yk3uFGDVEL2nVyU4=\n",
+        "request": "6dVlc/6xKsspG7cvC5+4qQ==\n"
+    },
+    {
+        "account": "account",
+        "service": "service",
+        "password_iteration": 0,
+        "password_length": 20,
+        "master_key": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=\n",
+        "request": "ZjsKEgPomlAf8XlT0Ni16A==\n"
+    },
+    {
+        "account": "account",
+        "service": "service",
+        "password_iteration": 1,
+        "password_length": 40,
+        "master_key": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=\n",
+        "request": "xIEccUaMnr8RKkFECZzoaw==\n"
+    },
+    {
+        "account": "account",
+        "service": "\u0445\u043e\u0441\u0442\u043d\u0430\u043c\u0435",
+        "password_iteration": 0,
+        "password_length": 40,
+        "master_key": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=\n",
+        "request": "FKb+nJsuAzGEu5hEYLk+Bg==\n"
+    },
+    {
+        "account": "\u0430\u0441\u0441\u043e\u0443\u043d\u0442",
+        "service": "service",
+        "password_iteration": 0,
+        "password_length": 40,
+        "master_key": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=\n",
+        "request": "N+Y7MN+G6sdaTKz4X9bsSQ==\n"
+    },
+    {
+        "account": "account",
+        "service": "service",
+        "password_iteration": 0,
+        "password_length": 40,
+        "master_key": "1111",
+        "request": "a5kHyjkC5S9CyD2ZH9KrKA==\n"
+    },
+    {
+        "account": "account",
+        "service": "service",
+        "password_iteration": 0,
+        "password_length": 6,
+        "master_key": "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=\n",
+        "request": "ZjsKEgPomlAf8XlT0Ni16A==\n"
+    },
+    {
+        "account": "account",
+        "service": "service",
+        "password_iteration": 0,
+        "password_length": 10,
+        "master_key": "ZzO3/+rOSIfDsxJYB5x4DY2zAY25y8BcUA3zUh+Wjfg=\n",
+        "request": "N0XEmraZJE1jsgBdPb4Xkg==\n"
+    },
+    {
+        "account": "",
+        "service": "",
+        "password_iteration": 0,
+        "password_length": 40,
+        "master_key": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=\n",
+        "request": "HelNKkKJfFTh71fquHZOKg==\n"
+    }
+]

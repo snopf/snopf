@@ -8,7 +8,7 @@
 void poll_delay_ms(uint16_t ms)
 {
     for (uint16_t i = 0; i < ms; i++) {
-        if (i % 20 == 0) {
+        if (i % 32 == 0) {
             usbPoll();
         }
         _delay_ms(1);

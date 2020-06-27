@@ -28,12 +28,12 @@ def combine_standard_request(request_dict):
     This is how a standard password request is created for example
     for a mail account login etc. All requests must follow this order
     to guarantee that we always get the same password for the same
-    hostname + account combination!
+    service + account combination!
     """
-    hostname = request_dict.get('hostname', '')
-    account = request_dict.get('account', '')
-    pin = request_dict.get('pin', '')
-    password_iteration = request_dict.get('password_iteration', 0)
+    service = request_dict['service']
+    account = request_dict['account']
+    master_key = request_dict['master_key']
+    password_iteration = request_dict['password_iteration']
     if password_iteration == 0:
         # For the first iteration we just want to have an empty string here
         # We could also just add a 0-string instead but for now that's how
@@ -41,9 +41,7 @@ def combine_standard_request(request_dict):
         password_iteration = ''
     else:
         password_iteration = str(password_iteration)
-        
-    free_string = request_dict.get('free_string', '')
     
     # The important part, this order MUST not be changed!
-    return reduce_message(hostname + account + pin 
-                          + password_iteration + free_string)
+    return reduce_message(service + account + master_key 
+                          + password_iteration)

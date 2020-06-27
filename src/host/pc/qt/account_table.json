@@ -1,8 +1,0 @@
-{
-    "test": {
-        "test": {
-            "password_iteration": 0,
-            "password_length": 40
-        }
-    }
-}

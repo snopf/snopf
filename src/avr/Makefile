@@ -52,9 +52,9 @@ TARGET = main
 
 
 # List C source files her (C dependencies are automatically generated.)
-SRC = $(TARGET).c usbdrv/usbdrv.c sha256/sha256.c usb_keyboard.c\
-	poll_delay.c pw_generator.c usb_comm.c secret_change.c\
-	z85/z85.c io_stuff.c secret.c
+SRC = $(TARGET).c usbdrv/usbdrv.c usb_keyboard.c poll_delay.c usb_comm.c \
+	io_stuff.c eeprom_access.c password_generator/sha256.c \
+	password_generator/password_generator.c
 
 
 # List Assembler source files here.
@@ -105,16 +105,15 @@ CINCS =
 #  -Wall...:     warning level
 #  -Wa,...:      tell GCC to pass this to the assembler.
 #    -adhlns...: create assembler listing
-CFLAGS = -g$(DEBUG)
-CFLAGS += $(CDEFS) $(CINCS)
-CFLAGS += -O$(OPT)
-CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
-CFLAGS += -Wall -Wstrict-prototypes
-CFLAGS += -Wa,-adhlns=$(<:.c=.lst)
-CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
-CFLAGS += $(CSTANDARD)
-CFLAGS += -DF_CPU=$(F_CPU)
-
+override CFLAGS += -g$(DEBUG)
+override CFLAGS += $(CDEFS) $(CINCS)
+override CFLAGS += -O$(OPT)
+override CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
+override CFLAGS += -Wall -Wstrict-prototypes
+override CFLAGS += -Wa,-adhlns=$(<:.c=.lst)
+override CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
+override CFLAGS += $(CSTANDARD)
+override CFLAGS += -DF_CPU=$(F_CPU)
 
 
 # Assembler flags.
@@ -432,9 +431,9 @@ clean_list :
 	$(REMOVE) $(SRC:.c=.s)
 	$(REMOVE) $(SRC:.c=.d)
 	$(REMOVE) .dep/*
-	$(REMOVE) sha256/test.out
-	$(REMOVE) z85/*.so
-
+	$(REMOVE) $(SRC:.c=.so)
+	$(REMOVE) snopf_test.so
+	
 
 
 # Include the dependency files.
@@ -446,11 +445,9 @@ clean_list :
 build elf hex eep lss sym coff extcoff \
 clean clean_list program
 
-# Run tests
-test :
-	cd sha256 && make test && cd .. && cd z85 && make test && cd ..
+# Targets for shared libs for python tests
+snopf_test.so:	password_generator/sha256.c password_generator/password_generator.c eeprom_access.c
+	@gcc -shared -Wl,-soname,snopf -o $@ -fPIC $^ -D TEST_NO_MCU -std=c99
 
-# DANGER DANGEROUS DEBUG version creation
-dangerous_test_version :
-	make clean && make CDEFS=-DTEST_PASSWORD_GENERATION_DANGEROUS && \
-	make program && make clean
+test:	snopf_test.so
+	pytest
