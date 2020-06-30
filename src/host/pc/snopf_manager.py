@@ -16,12 +16,11 @@ from get_commit_hash import get_commit_hash
 from set_secret_wizard import SetSecretWizard
 import password_generator as pw
 import account_table as at
+from websocket_server import SnopfWebsocketServer
 import snopf_logging
 
 import sys
 from PySide2.QtCore import *
-from PySide2.QtNetwork import *
-from PySide2.QtWebSockets import *
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 import os
@@ -29,7 +28,6 @@ import json
 import fcntl
 import copy
 from pathlib import Path
-import logging
 import resources_rc
 
 logger = snopf_logging.get_logger('main')
@@ -161,7 +159,13 @@ class SnopfManager(QMainWindow):
             except FileNotFoundError:
                 logger.warning('Last file % s not found, skipping auto load' % lastFileName)
         
-        self.initWebsocketServer()
+        # Websocket server
+        self.websocketServer = SnopfWebsocketServer(self, self.options['websocket-port'])
+        self.websocketServer.deviceAvailableRequest.connect(
+            lambda ws: self.websocketServer.sendDeviceAvailable(ws, usb_comm.is_device_available()))
+        self.websocketServer.accountsRequest.connect(
+            lambda ws: self.websocketServer.sendAccountsList(ws, self.getAccounts()))
+        self.websocketServer.passwordRequest.connect(self.requestPassword)
     
     def logException(self, exctype, value, traceback):
         '''Log uncaught execptions and show an info message'''
@@ -189,113 +193,7 @@ class SnopfManager(QMainWindow):
         self.setWindowTitle('Snopf %s' % self.__fileName)
     
     fileName = property(getFileName, setFileName)
-        
-    def initWebsocketServer(self):
-        '''Init Snopf websocket server for browser plugin'''
-        self.websocketServer = QWebSocketServer('snopf-websocket-server',
-                                                QWebSocketServer.SslMode.NonSecureMode , self)
-        # List of connections
-        self.websockets = []
-        # Start server
-        success = self.websocketServer.listen(QHostAddress.LocalHost,
-                                              port=self.options['websocket-port'])
-        if not success:
-            logger.error('Cannot start websocket server')
-            err = self.websocketServer.errorString()
-            logger.error(err)
-            QMessageBox.critical(
-                self, 'Websocket Error', 'Could not start websocket server. Error Message: %s' % err,
-                QMessageBox.Ok)
-        
-        logger.info('Running websocket server with name %s' % self.websocketServer.serverName())
-        logger.info('Websocket server address: %s, port: %d' % (
-            self.websocketServer.serverAddress(), self.websocketServer.serverPort()))
-        
-        self.websocketServer.newConnection.connect(self.wsNewConnection)
-        self.websocketServer.acceptError.connect(self.wsAcceptError)
-        self.websocketServer.serverError.connect(self.wsServerError)
-                
-    def wsNewConnection(self):
-        logger.info('New websocket connection')
-        websocket = self.websocketServer.nextPendingConnection()
-        self.websockets.append(websocket)
-        logger.info('current list of websockets: %s' % str(self.websockets))
-        websocket.textMessageReceived.connect(lambda msg: self.wsTextMessageReceived(websocket, msg))
-        websocket.disconnected.connect(lambda: self.wsDisconnected(websocket))
-        websocket.error.connect(lambda: self.wsError(websocket))
-        
-    def wsAcceptError(self, socketError):
-        logger.error('Websocket Accept Error %d' % socketError)
-        err = self.websocketServer.errorString()
-        logger.error(err)
-        QMessageBox.critical(self, 'Websocket Error', err, QMessageBox.Ok)
     
-    def wsServerError(self, closeCode):
-        logger.error('Websocket Server Error %d' % closeCode)
-        err = self.websocketServer.errorString()
-        logger.error(err)
-        QMessageBox.critical(self, 'Websocket Error', err, QMessageBox.Ok)
-    
-    def wsDisconnected(self, websocket):
-        logger.info('ws disconnected %s' % str(websocket))
-        self.websockets.pop(self.websockets.index(websocket))
-        logger.info('current list of websockets: %s' % str(self.websockets))
-        
-    def wsError(self, websocket, socketError):
-        logger.error('ws error %d' % socketError)
-        err = websocket.errorString()
-        logger.error(err)
-        QMessageBox.critical(self, 'Websocket Error', err, QMessageBox.Ok)
-        
-    def wsCreateMessage(self, cmd, data=''):
-        '''Build websocket message for command cmd and payload data'''
-        return json.dumps({'cmd': cmd, 'data': data})
-        
-    def getAccounts(self):
-        '''Just return a hostname: accounts dictionary without additional information (passsword length etc.)'''
-        return {hostname: [account for account in self.accountTable[hostname].keys()]
-                for hostname in self.accountTable.keys()}
-        
-    def wsTextMessageReceived(self, websocket, msg):
-        '''Slot for text messages from websocket connections'''
-        logger.info('ws text msg received from %s' % str(websocket))
-        try:
-            msg = json.loads(msg)
-        except json.JSONDecodeError:
-            logger.error('Could not read message from client')
-            return
-        if msg['cmd'] == 'get-accounts':
-            logger.info('got get-accounts msg')
-            data = self.getAccounts()
-            ourMsg = self.wsCreateMessage('new-accounts', data)
-            websocket.sendTextMessage(ourMsg)
-            return
-        if msg['cmd'] == 'get-device-available':
-            logger.info('got device-available msg')
-            data = {'device-available': usb_comm.is_device_available()}
-            ourMsg = self.wsCreateMessage('device-available', data)
-            websocket.sendTextMessage(ourMsg)
-            return
-        if msg['cmd'] == 'password-request':
-            logger.info('got password-request')
-            data = msg['data']
-            if not self.entryExists(data['service'], data['account']):
-                if data['add_new_entries']:
-                    logger.info('adding new entry')
-                    self.addEntry(data['service'], data['account'])
-                else:
-                    logger.warning('Invalid request, unknown entry requested')
-                    return
-            
-            self.requestPassword(data['service'], data['account'])
-            
-    def wsSendAccountTable(self):
-        '''Send the current account table to all connected websockets'''
-        data = self.getAccounts()
-        msg = self.wsCreateMessage('new-accounts', data)
-        for websocket in self.websockets:
-            websocket.sendTextMessage(msg)
-        
     def fixKeymapEdit(self):
         '''Sort keys in the keymap edit and fill up remaining key set'''
         self.ui.keymapEdit.setText(''.join(pw.sort_keys(self.ui.keymapEdit.text())))
@@ -519,8 +417,6 @@ class SnopfManager(QMainWindow):
                 
             self.selectedEntry = None
             self.accountItemActivated(self.ui.accountTreeWidget.currentItem())
-            # Send new data to all connected websockets
-            self.wsSendAccountTable()
             
     def addEntryItem(self, service, account):
         '''Add account item to tree widget'''
@@ -537,15 +433,18 @@ class SnopfManager(QMainWindow):
         aItem.setText(1, account)
         sItem.addChild(aItem)
         sItem.setExpanded(True)
-        # Send new data to all connected websockets
-        self.wsSendAccountTable()
         
+    def getAccounts(self):
+        '''Just return a hostname: accounts dictionary without additional information (passsword length etc.)'''
+        return {hostname: [account for account in self.accountTable[hostname].keys()]
+                for hostname in self.accountTable.keys()}
+    
     def entryExists(self, service, account):
         '''Check whether a service/account tuple already exists'''
         return service in self.accountTable and account in self.accountTable[service]
     
     def addEntry(self, service, account):
-        '''Create a new entry in the account table'''
+        '''Create a new entry in the account table using default values'''
         if self.entryExists(service, account):
             logger.warning('Attempted to create existing entry')
             return
@@ -681,8 +580,14 @@ class SnopfManager(QMainWindow):
             return str(Path.home())
         return os.path.dirname(os.path.abspath(self.fileName))
             
-    def requestPassword(self, service=None, account=None):
-        '''Make a password request to snopf using the currently selected entry'''
+    def requestPassword(self, service=None, account=None, makeNewEntry=False):
+        '''
+        Make a password request using the given service and account combination.
+        If no service and account are submitted the currently selected item from the account table
+        widget is used
+        If makeNewEntry is set to True a non-existing service-account tuple will be added to the
+        account table if necessary
+        '''
         if not service:
             service = self.selectedService
             account = self.selectedAccount
@@ -692,6 +597,15 @@ class SnopfManager(QMainWindow):
             QMessageBox.critical(self, 'Device not found', 'The device is not plugged in.',
                                  QMessageBox.Ok)
             return
+        
+        if not self.entryExists(service, account):
+            logger.info('Password request with unknown service-account combination')
+            if makeNewEntry:
+                logger.info('Creating new entry')
+                self.addEntry(service, account)
+            else:
+                logger.warning('Unknown service-account but no new entry created')
+                return
         
         password_iteration = self.accountTable[service][account]['password_iteration']
         password_length = self.accountTable[service][account]['password_length']
