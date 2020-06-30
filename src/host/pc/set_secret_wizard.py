@@ -22,7 +22,7 @@ from PySide2.QtWidgets import *
 
 import os
 
-logger = snopf_logging.get_logger('set_secret_wizard')
+logger = snopf_logging.get_logger('set-secret-wizard')
 
 class SetSecretWizard(QWizard):
     
