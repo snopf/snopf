@@ -42,7 +42,8 @@ USB_MSG_LENGTH = 86
 def check_msg_length(build_func):
     def f(*args, **kwargs):
         m = build_func(*args, **kwargs)
-        assert len(m) == USB_MSG_LENGTH
+        if not len(m) == USB_MSG_LENGTH:
+            raise ValueError('Wrong message length')
         return m
     return f
 
