@@ -135,7 +135,7 @@ def send_message(dev, msg):
     return dev.ctrl_transfer(VENDOR_REQUEST_NUM, 0, 0, 0, msg)
     
 def is_device_available():
-    '''Test if the device is plugged in '''
+    '''Test if the device is plugged in'''
     dev = usb.core.find(idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
     return dev != None
     
