@@ -35,5 +35,3 @@ def test_cmd_password_request(qtbot):
                       'data': {'service': 'test', 'account': 'test',
                                'add_new_entries': False}})
     _test_msg(qtbot, msg, 'passwordRequest')
-    
-    
