@@ -30,7 +30,7 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QTreeWidget" name="accountTreeWidget">
+      <widget class="AccountTableWidget" name="accountTableWidget">
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
@@ -863,6 +863,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AccountTableWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>account_table_widget</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

@@ -116,8 +116,7 @@ class SnopfManager(QMainWindow):
         self.ui.actionSetKeyboardDelay.triggered.connect(self.setKeyboardDelay)
         
         # Account table
-        self.ui.accountTreeWidget.setHeaderLabels(['Service', 'Account'])
-        self.ui.accountTreeWidget.itemActivated.connect(self.accountItemActivated)
+        self.ui.accountTableWidget.accountSelected.connect(self.accountSelected)
         self.ui.commitChangesButton.clicked.connect(self.commitChanges)
         self.ui.deleteEntryButton.clicked.connect(self.deleteEntry)
         self.ui.requestPasswordButton.clicked.connect(lambda x: self.requestPassword())
@@ -279,70 +278,31 @@ class SnopfManager(QMainWindow):
             self.ui.entropyEdit.setText('\N{WARNING SIGN} {:0.2f}'.format(entropy))
             self.ui.entropyEdit.setStyleSheet('QLineEdit { background: rgb(240, 125, 125); }')
             self.ui.entropyEdit.setToolTip('Warning: The entropy might be lower than shown due to selected rules.')
-    
-    def serviceFromItem(self, item):
-        '''Get the name of the service for the selected item, None if it's a toplevel item'''
-        if item.childCount() != 0:
-            return None
-        return item.parent().text(0)
-    
-    def accountFromItem(self, item):
-        '''Get the name of the account for the selected item, None if it's a toplevel item'''
-        if item.childCount() != 0:
-            return None
-        return item.text(1)    
-    
-    def initAccountTableWidget(self):
-        '''Initialize tree widget with new account table entries'''
-        logger.info('Refilling account table widget')
-        self.ui.accountTreeWidget.clear()
-        self.ui.accountTreeWidget.invisibleRootItem().setExpanded(True)
-        for service in sorted(self.accountTable.keys()):
-            sItem = QTreeWidgetItem()
-            sItem.setText(0, service)
-            for account in sorted(self.accountTable[service].keys()):
-              aItem = QTreeWidgetItem()
-              aItem.setText(1, account)
-              sItem.addChild(aItem)
             
-            self.ui.accountTreeWidget.invisibleRootItem().addChild(sItem)
-            sItem.setExpanded(True)
+    def initNewAccountTable(self):
+        '''Initialize tree widget with new account table entries'''
+        self.ui.accountTableWidget.initNewAccountTable(self.accountTable)
         # Enable account table editing
         self.ui.actionNewEntry.setEnabled(True)
         self.ui.actionDeleteEntry.setEnabled(True)
         self.ui.actionSave.setEnabled(True)
         
-    def accountItemActivated(self, item):
+    def accountSelected(self, service, account):
         '''Slot for activated item in account table tree widget'''
-        logger.info('Account item activated: %s' % str(item))
-        service = self.serviceFromItem(item)
-        if service is None:
-            # Select the first account entry item instead if we clicked on the toplevel item
-            item = item.child(0)
-            self.ui.accountTreeWidget.setCurrentItem(item)
-            self.accountItemActivated(item)
-            return
-        account = self.accountFromItem(item)
-        
         self.checkCommit()
-        
-        self.selectedAccount = account
         self.selectedService = service
+        self.selectedAccount = account
         self.selectedEntry = copy.deepcopy(self.accountTable[service][account])
         self.ui.serviceEdit.setText(service)
         self.ui.accountEdit.setText(account)
         self.ui.commentEdit.setText(self.selectedEntry['comment'])
         self.ui.lengthSpinner.setValue(self.selectedEntry['password_length'])
         self.ui.iterationSpinner.setValue(self.selectedEntry['password_iteration'])
-        
         self.setRulesUi(self.selectedEntry['rules'])
-        
         self.updateEntropy()
-        
         self.ui.pwAppendixEdit.clear()
         for a in self.selectedEntry['appendix']:
             self.ui.pwAppendixEdit.insert(pw.KEY_TABLE[a])
-            
         self.ui.keymapEdit.clear()
         for key in self.selectedEntry['keymap']:
             self.ui.keymapEdit.insert(pw.KEY_TABLE[key])
@@ -396,44 +356,19 @@ class SnopfManager(QMainWindow):
                 
     def deleteEntry(self):
         '''Delete the entry from the account table'''
-        item = self.ui.accountTreeWidget.currentItem()
-        if not item:
-            return
-        service = self.serviceFromItem(item)
-        account = self.accountFromItem(item)
+        service = self.ui.accountTableWidget.currentService()
+        account = self.ui.accountTableWidget.currentAccount()
         if self.askUser('Remove Entry', 
                         'Do you really want to remove the entry %s / %s' % (service, account)):
             logger.info('Deleting selected item')
-            parent = item.parent()
-            parent.removeChild(item)
-            if parent.childCount() == 0:
-                # Remove the service completely if no accounts are left
-                self.ui.accountTreeWidget.invisibleRootItem().removeChild(parent)
-                logger.info('Service entry is now empty and thus deleted')
-                
+            
+            self.ui.accountTableWidget.deleteEntry(service, account)
             self.accountTable[service].pop(account)
             if len(self.accountTable[service]) == 0:
                 self.accountTable.pop(service)
                 
             self.selectedEntry = None
-            self.accountItemActivated(self.ui.accountTreeWidget.currentItem())
-            
-    def addEntryItem(self, service, account):
-        '''Add account item to tree widget'''
-        sItem = None
-        for i in range(self.ui.accountTreeWidget.invisibleRootItem().childCount()):
-            if self.ui.accountTreeWidget.invisibleRootItem().child(i).text(0) == service:
-                sItem = self.ui.accountTreeWidget.invisibleRootItem().child(i)
-                break
-        if sItem is None:
-            sItem = QTreeWidgetItem()
-            sItem.setText(0, service)
-            self.ui.accountTreeWidget.invisibleRootItem().addChild(sItem)
-        aItem = QTreeWidgetItem()
-        aItem.setText(1, account)
-        sItem.addChild(aItem)
-        sItem.setExpanded(True)
-        
+
     def getAccounts(self):
         '''Just return a hostname: accounts dictionary without additional information (passsword length etc.)'''
         return {hostname: [account for account in self.accountTable[hostname].keys()]
@@ -452,7 +387,7 @@ class SnopfManager(QMainWindow):
             self.accountTable[service] = {}
             
         self.accountTable[service][account] = at.create_entry()
-        self.addEntryItem(service, account)
+        self.ui.accountTableWidget.addItem(service, account)
         self.dataChanged = True
     
     def newEntry(self):
@@ -494,7 +429,7 @@ class SnopfManager(QMainWindow):
             return
         self.masterPassphrase = passphrase_one
         self.accountTable = {}
-        self.initAccountTableWidget()
+        self.initNewAccountTable()
         self.fileName = None
         self.dataChanged = False
         
@@ -542,7 +477,7 @@ class SnopfManager(QMainWindow):
         self.masterPassphrase = passphrase
         self.dataChanged = False
         self.fileName = fileName
-        self.initAccountTableWidget()
+        self.initNewAccountTable()
     
     def saveAccountTable(self):
         '''Save curent account table to hard disk'''

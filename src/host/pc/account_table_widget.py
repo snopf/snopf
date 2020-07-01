@@ -24,9 +24,6 @@ class AccountTableWidget(QTreeWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
-        
-        self.setHeaderLabels(['Service', 'Account'])
-        
         self.itemActivated.connect(self.selectFirstChild)
         
     def initNewAccountTable(self, accountTable):
@@ -37,6 +34,7 @@ class AccountTableWidget(QTreeWidget):
             for account in sorted(accountTable[service].keys()):
                 self.addItem(service, account)
         self.invisibleRootItem().setExpanded(True)
+        self.setHeaderLabels(['Service', 'Account'])
         
     def currentService(self):
         '''Get service name for currently selected item'''
@@ -88,6 +86,7 @@ class AccountTableWidget(QTreeWidget):
         
     def addItem(self, service, account):
         '''Add new item to widget'''
+        logger.info('adding new entry')
         sItem = self.getServiceItem(service)
         if not sItem:
             sItem = self.createParentItem(service)

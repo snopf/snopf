@@ -15,6 +15,8 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
 
+from account_table_widget import AccountTableWidget
+
 import resources_rc
 
 class Ui_SnopfManager(object):
@@ -63,17 +65,17 @@ class Ui_SnopfManager(object):
         self.splitter = QSplitter(self.centralwidget)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Horizontal)
-        self.accountTreeWidget = QTreeWidget(self.splitter)
+        self.accountTableWidget = AccountTableWidget(self.splitter)
         __qtreewidgetitem = QTreeWidgetItem()
         __qtreewidgetitem.setText(1, u"2");
         __qtreewidgetitem.setText(0, u"1");
-        self.accountTreeWidget.setHeaderItem(__qtreewidgetitem)
-        self.accountTreeWidget.setObjectName(u"accountTreeWidget")
-        self.accountTreeWidget.setSortingEnabled(True)
-        self.accountTreeWidget.setHeaderHidden(False)
-        self.accountTreeWidget.setColumnCount(2)
-        self.splitter.addWidget(self.accountTreeWidget)
-        self.accountTreeWidget.header().setVisible(True)
+        self.accountTableWidget.setHeaderItem(__qtreewidgetitem)
+        self.accountTableWidget.setObjectName(u"accountTableWidget")
+        self.accountTableWidget.setSortingEnabled(True)
+        self.accountTableWidget.setHeaderHidden(False)
+        self.accountTableWidget.setColumnCount(2)
+        self.splitter.addWidget(self.accountTableWidget)
+        self.accountTableWidget.header().setVisible(True)
         self.layoutWidget = QWidget(self.splitter)
         self.layoutWidget.setObjectName(u"layoutWidget")
         self.verticalLayout_3 = QVBoxLayout(self.layoutWidget)
