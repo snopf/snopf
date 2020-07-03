@@ -9,7 +9,6 @@ rm -rf ${dist_path}libQt5Charts.so.5
 rm -rf ${dist_path}libQt5Bluetooth.so.5
 rm -rf ${dist_path}libQt5Multimedia.so.5
 rm -rf ${dist_path}libQt5Quick3DRuntimeRender.so.5
-rm -rf ${dist_path}PySide2/QtNetwork.abi3.so
 rm -rf ${dist_path}PySide2/QtQml.abi3.so
 rm -rf ${dist_path}PySide2/qml
  
