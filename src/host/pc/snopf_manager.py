@@ -32,18 +32,6 @@ import resources_rc
 
 logger = snopf_logging.get_logger('main')
 
-class KeymapValidator(QValidator):
-    
-    def __init__(self, lineEdit, parent=None):
-        super(KeymapValidator, self).__init__(parent)
-        self.lineEdit = lineEdit
-        
-    def validate(self, inp, pos):
-        if len(set(inp)) == len(inp) and all([i in pw.KEY_TABLE for i in inp]):
-            return QValidator.Acceptable
-        return QValidator.Invalid
-    
-    
 class SnopfManager(QMainWindow):
 
 # TODO Add last date changed entry (+ what was changed?)
@@ -124,15 +112,16 @@ class SnopfManager(QMainWindow):
         self.ui.tabWidget.currentChanged.connect(self.tabChanged)
         
         # Keymap editing
-        self.ui.keymapEdit.textChanged.connect(self.fixKeymapEdit)
-        v = KeymapValidator(self.ui.remainingKeysEdit, self)
-        self.ui.keymapEdit.setValidator(v)
-        self.ui.addLowercaseButton.clicked.connect(self.kmAddLowercase)
-        self.ui.addUppercaseButton.clicked.connect(self.kmAddUppercase)
-        self.ui.addNumericalButton.clicked.connect(self.kmAddNumerical)
-        self.ui.addSpecialButton.clicked.connect(self.kmAddSpecial)
-        self.ui.applyKeymapButton.clicked.connect(self.kmSelectPreset)
+        self.ui.keymapEdit.keymapChanged.connect(
+            lambda remKeys: self.ui.remainingKeysEdit.setText(''.join(remKeys)))
+        self.ui.addLowercaseButton.clicked.connect(self.ui.keymapEdit.addLowercase)
+        self.ui.addUppercaseButton.clicked.connect(self.ui.keymapEdit.addUppercase)
+        self.ui.addNumericalButton.clicked.connect(self.ui.keymapEdit.addNumerical)
+        self.ui.addSpecialButton.clicked.connect(self.ui.keymapEdit.addSpecial)
+        self.ui.applyKeymapButton.clicked.connect(self.selectPresetKeymap)
         self.fillKeymapCombobox()
+        
+        # Appendix
         self.addAppendixValidator()
         
         # Password settings
@@ -193,33 +182,11 @@ class SnopfManager(QMainWindow):
     
     fileName = property(getFileName, setFileName)
     
-    def fixKeymapEdit(self):
-        '''Sort keys in the keymap edit and fill up remaining key set'''
-        self.ui.keymapEdit.setText(''.join(pw.sort_keys(self.ui.keymapEdit.text())))
-        remainingKeys = pw.key_table_set.difference(set(self.ui.keymapEdit.text()))
-        self.ui.remainingKeysEdit.setText(''.join(pw.sort_keys(remainingKeys)))
-        
-    def kmAddLowercase(self):
-        for char in pw.KEY_TABLE[:pw.PW_GROUP_BOUND_LOWERCASE]:
-            self.ui.keymapEdit.insert(char)
-            
-    def kmAddUppercase(self):
-        for char in pw.KEY_TABLE[pw.PW_GROUP_BOUND_LOWERCASE:pw.PW_GROUP_BOUND_UPPERCASE]:
-            self.ui.keymapEdit.insert(char)
-    
-    def kmAddNumerical(self):
-        for char in pw.KEY_TABLE[pw.PW_GROUP_BOUND_UPPERCASE:pw.PW_GROUP_BOUND_DIGIT]:
-            self.ui.keymapEdit.insert(char)
-    
-    def kmAddSpecial(self):
-        for char in pw.KEY_TABLE[pw.PW_GROUP_BOUND_DIGIT:]:
-            self.ui.keymapEdit.insert(char)
-            
     def fillKeymapCombobox(self):
         for name in pw.keymap_names.keys():
             self.ui.selectKeymapComboBox.addItem(name)
             
-    def kmSelectPreset(self, index):
+    def selectPresetKeymap(self, index):
         km = pw.keymaps[pw.keymap_names[self.ui.selectKeymapComboBox.currentText()]]
         self.ui.keymapEdit.clear()
         for char in km:

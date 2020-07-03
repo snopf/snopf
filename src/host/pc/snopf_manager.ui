@@ -59,7 +59,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="generalTab">
            <attribute name="title">
@@ -575,7 +575,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="keymapEdit">
+               <widget class="KeymapLineEdit" name="keymapEdit">
                 <property name="text">
                  <string>abcdefghijklmnopqrABCDEFGHIJKLMNOPQR0123456789-@!?$*+=&amp;#[]().:&gt;&lt;</string>
                 </property>
@@ -868,6 +868,11 @@
    <class>AccountTableWidget</class>
    <extends>QTreeWidget</extends>
    <header>account_table_widget</header>
+  </customwidget>
+  <customwidget>
+   <class>KeymapLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>keymap_editing</header>
   </customwidget>
  </customwidgets>
  <resources>

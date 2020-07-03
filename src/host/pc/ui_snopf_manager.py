@@ -16,6 +16,7 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
 from PySide2.QtWidgets import *
 
 from account_table_widget import AccountTableWidget
+from keymap_editing import KeymapLineEdit
 
 import resources_rc
 
@@ -376,7 +377,7 @@ class Ui_SnopfManager(object):
 
         self.verticalLayout_4.addWidget(self.label_7)
 
-        self.keymapEdit = QLineEdit(self.keymapTab)
+        self.keymapEdit = KeymapLineEdit(self.keymapTab)
         self.keymapEdit.setObjectName(u"keymapEdit")
         self.keymapEdit.setMaxLength(64)
 
@@ -527,7 +528,7 @@ class Ui_SnopfManager(object):
 
         self.retranslateUi(SnopfManager)
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(SnopfManager)
