@@ -5,12 +5,7 @@
 
 from keymap_editing import *
 
-import os
-import sys
-sys.path.insert(1, os.path.join(sys.path[0], '../../test_data'))
-from test_tools import *
 from pytestqt import *
-import json
 
 def test_validator(qtbot):
     val = KeymapValidator()
