@@ -49,26 +49,29 @@ rule_names = [key for key in password_rules.keys()]
 # "hit enter rule" for completeness, unused in the python implementation
 PW_RULE_HIT_ENTER = 1 << 6
 
+# Absolute size of all keymaps
+KEYMAP_SIZE = 64
+
 keymaps = {}
 # Standard keymap that uses all keys
-keymaps['all'] = [i for i in range(64)]
+keymaps['all'] = [i for i in range(KEYMAP_SIZE)]
 
 # Maps all base64 indices to the ten digits from 0 to 9
 keymaps['digits'] = ([i for i in range(PW_GROUP_BOUND_UPPERCASE,
-                                   PW_GROUP_BOUND_DIGIT)] * 7)[:64]
+                                   PW_GROUP_BOUND_DIGIT)] * 7)[:KEYMAP_SIZE]
 
 # Maps all base64 indices to letters only
-keymaps['letters'] = ([i for i in range(0, PW_GROUP_BOUND_UPPERCASE)] * 2)[:64]
+keymaps['letters'] = ([i for i in range(0, PW_GROUP_BOUND_UPPERCASE)] * 2)[:KEYMAP_SIZE]
 
 # Maps all base64 indices to lowercase only
-keymaps['lowercase'] = ([i for i in range(0, PW_GROUP_BOUND_LOWERCASE)] * 4)[:64]
+keymaps['lowercase'] = ([i for i in range(0, PW_GROUP_BOUND_LOWERCASE)] * 4)[:KEYMAP_SIZE]
 
 # Maps all base64 indices to uppercase only
 keymaps['uppercase'] = ([i for i in range(PW_GROUP_BOUND_LOWERCASE,
-                                      PW_GROUP_BOUND_UPPERCASE)] * 4)[:64]
+                                      PW_GROUP_BOUND_UPPERCASE)] * 4)[:KEYMAP_SIZE]
 
 # Maps all base64 indices to digits + letters only
-keymaps['alpha_numer'] = ([i for i in range(0, PW_GROUP_BOUND_DIGIT)] * 2)[:64]
+keymaps['alpha_numer'] = ([i for i in range(0, PW_GROUP_BOUND_DIGIT)] * 2)[:KEYMAP_SIZE]
 
 # Maps all base64 indices to hex numbers only
 keymaps['hex'] = [0, 1, 2, 3, 4, 5, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45] * 4
@@ -106,7 +109,7 @@ def keys_to_keymap(keys):
     keys = [KEY_TABLE.index(k) for k in keys]
     num_keys = len(keys)
     # Fill up until we have 64 entries
-    for i in range(num_keys, 64):
+    for i in range(num_keys, KEYMAP_SIZE):
         keys.append(keys[i%num_keys])
     return keys
 
@@ -346,11 +349,11 @@ def check_keymap_valid(keymap):
     A valid keymap must be of length 64 and each index must be between 0 and 63,
     and at least 3 different indices must be in the map.
     '''
-    if len(keymap) != 64:
+    if len(keymap) != KEYMAP_SIZE:
         return False
     if len(set(keymap)) < 3:
         return False
-    if not all([0 <= key < 64 for key in keymap]):
+    if not all([0 <= key < KEYMAP_SIZE for key in keymap]):
         return False
     return True
 
