@@ -14,7 +14,7 @@ import usb_comm
 from new_entry_dialog import NewEntryDialog
 from get_commit_hash import get_commit_hash
 from set_secret_wizard import SetSecretWizard
-import password_generator as pw
+import password_generator as pg
 import account_table as at
 from websocket_server import SnopfWebsocketServer
 import snopf_logging
@@ -125,9 +125,9 @@ class SnopfManager(QMainWindow):
         self.addAppendixValidator()
         
         # Password settings
-        self.ui.lengthSpinner.setMinimum(pw.MIN_PW_LENGTH)
-        self.ui.lengthSpinner.setMaximum(pw.MAX_PW_LENGTH)
-        self.ui.lengthSpinner.setValue(pw.DEFAULT_PW_LENGTH)
+        self.ui.lengthSpinner.setMinimum(pg.MIN_PW_LENGTH)
+        self.ui.lengthSpinner.setMaximum(pg.MAX_PW_LENGTH)
+        self.ui.lengthSpinner.setValue(pg.DEFAULT_PW_LENGTH)
         
         self.ui.lengthSpinner.valueChanged.connect(self.updateSelectedEntry)
         self.ui.includeLowercaseCB.stateChanged.connect(self.updateSelectedEntry)
@@ -183,24 +183,24 @@ class SnopfManager(QMainWindow):
     fileName = property(getFileName, setFileName)
     
     def fillKeymapCombobox(self):
-        for name in pw.keymap_names.keys():
+        for name in pg.keymap_names.keys():
             self.ui.selectKeymapComboBox.addItem(name)
             
     def selectPresetKeymap(self, index):
-        km = pw.keymaps[pw.keymap_names[self.ui.selectKeymapComboBox.currentText()]]
+        km = pg.keymaps[pg.keymap_names[self.ui.selectKeymapComboBox.currentText()]]
         self.ui.keymapEdit.clear()
         for char in km:
-            self.ui.keymapEdit.insert(pw.KEY_TABLE[char])
+            self.ui.keymapEdit.insert(pg.KEY_TABLE[char])
             
     def addAppendixValidator(self):
         '''Validator for appendix input that only allows input from snopf character table'''
         regex = '^['
         # Add all lowercase + uppercase + digits
-        for i in range(pw.PW_GROUP_BOUND_DIGIT):
-            regex += str(pw.KEY_TABLE[i])
+        for i in range(pg.PW_GROUP_BOUND_DIGIT):
+            regex += str(pg.KEY_TABLE[i])
         # Add special characters
-        for i in range(pw.PW_GROUP_BOUND_DIGIT, pw.PW_GROUP_BOUND_SPECIAL):
-            regex += '\\' + str(pw.KEY_TABLE[i])
+        for i in range(pg.PW_GROUP_BOUND_DIGIT, pg.PW_GROUP_BOUND_SPECIAL):
+            regex += '\\' + str(pg.KEY_TABLE[i])
         regex += ']*'
         validator = QRegExpValidator(QRegExp(regex), self)
         self.ui.pwAppendixEdit.setValidator(validator)
@@ -209,34 +209,34 @@ class SnopfManager(QMainWindow):
         '''Get rules integer from selected checkboxes'''
         rules = 0
         if self.ui.includeLowercaseCB.isChecked():
-            rules += pw.PW_RULE_INCLUDE_LOWERCASE
+            rules += pg.PW_RULE_INCLUDE_LOWERCASE
         if self.ui.includeUppercaseCB.isChecked():
-            rules += pw.PW_RULE_INCLUDE_UPPERCASE
+            rules += pg.PW_RULE_INCLUDE_UPPERCASE
         if self.ui.includeNumericalCB.isChecked():
-            rules += pw.PW_RULE_INCLUDE_DIGIT
+            rules += pg.PW_RULE_INCLUDE_DIGIT
         if self.ui.includeSpecialCB.isChecked():
-            rules += pw.PW_RULE_INCLUDE_SPECIAL
+            rules += pg.PW_RULE_INCLUDE_SPECIAL
         if self.ui.avoidRepCB.isChecked():
-            rules += pw.PW_RULE_NO_REP
+            rules += pg.PW_RULE_NO_REP
         if self.ui.avoidSeqCB.isChecked():
-            rules += pw.PW_RULE_NO_SEQ
+            rules += pg.PW_RULE_NO_SEQ
         return rules
     
     def setRulesUi(self, rules):
         '''Set checkboxes according to rules'''
-        self.ui.includeLowercaseCB.setChecked(bool(rules & pw.PW_RULE_INCLUDE_LOWERCASE))
-        self.ui.includeUppercaseCB.setChecked(bool(rules & pw.PW_RULE_INCLUDE_UPPERCASE))
-        self.ui.includeNumericalCB.setChecked(bool(rules & pw.PW_RULE_INCLUDE_DIGIT))
-        self.ui.includeSpecialCB.setChecked(bool(rules & pw.PW_RULE_INCLUDE_SPECIAL))
-        self.ui.avoidRepCB.setChecked(bool(rules & pw.PW_RULE_NO_REP))
-        self.ui.avoidSeqCB.setChecked(bool(rules & pw.PW_RULE_NO_SEQ))
+        self.ui.includeLowercaseCB.setChecked(bool(rules & pg.PW_RULE_INCLUDE_LOWERCASE))
+        self.ui.includeUppercaseCB.setChecked(bool(rules & pg.PW_RULE_INCLUDE_UPPERCASE))
+        self.ui.includeNumericalCB.setChecked(bool(rules & pg.PW_RULE_INCLUDE_DIGIT))
+        self.ui.includeSpecialCB.setChecked(bool(rules & pg.PW_RULE_INCLUDE_SPECIAL))
+        self.ui.avoidRepCB.setChecked(bool(rules & pg.PW_RULE_NO_REP))
+        self.ui.avoidSeqCB.setChecked(bool(rules & pg.PW_RULE_NO_SEQ))
         
     def updateEntropy(self, *args, **kwargs):
         '''Update the entropy field value'''
         if not self.selectedEntry:
             self.ui.entropyEdit.setText('')
             return
-        entropy = pw.calc_entropy_password(self.selectedEntry['keymap'],
+        entropy = pg.calc_entropy_password(self.selectedEntry['keymap'],
                                            self.selectedEntry['password_length'])
         self.ui.entropyEdit.setText('{:0.2f}'.format(entropy))
         self.ui.entropyEdit.setStyleSheet('QLineEdit { background: rgb(255, 255, 255); }')
@@ -269,19 +269,19 @@ class SnopfManager(QMainWindow):
         self.updateEntropy()
         self.ui.pwAppendixEdit.clear()
         for a in self.selectedEntry['appendix']:
-            self.ui.pwAppendixEdit.insert(pw.KEY_TABLE[a])
+            self.ui.pwAppendixEdit.insert(pg.KEY_TABLE[a])
         self.ui.keymapEdit.clear()
         for key in self.selectedEntry['keymap']:
-            self.ui.keymapEdit.insert(pw.KEY_TABLE[key])
+            self.ui.keymapEdit.insert(pg.KEY_TABLE[key])
             
     def tabChanged(self, index):
         # Not really a change
         if index == self.lastTabIndex:
             return
         # Check whether the changes we made are compatible
-        keymap = pw.keys_to_keymap(self.ui.keymapEdit.text())
-        if (not pw.check_keymap_valid(keymap)
-            or not pw.check_rules_valid(self.selectedEntry['rules'], keymap)):
+        keymap = pg.keys_to_keymap(self.ui.keymapEdit.text())
+        if (not pg.check_keymap_valid(keymap)
+            or not pg.check_rules_valid(self.selectedEntry['rules'], keymap)):
             self.ui.tabWidget.setCurrentIndex(self.lastTabIndex)
             QMessageBox.information(self, 'Invalid Keymap',
                                     'The chosen keymap and rules are incompatible',
@@ -307,9 +307,9 @@ class SnopfManager(QMainWindow):
         self.selectedEntry['password_length'] = self.ui.lengthSpinner.value()
         self.selectedEntry['password_iteration'] = self.ui.iterationSpinner.value()
         self.selectedEntry['rules'] = self.getRules()
-        self.selectedEntry['keymap'] = pw.keys_to_keymap(self.ui.keymapEdit.text())
+        self.selectedEntry['keymap'] = pg.keys_to_keymap(self.ui.keymapEdit.text())
         self.selectedEntry['comment'] = self.ui.commentEdit.text()
-        self.selectedEntry['appendix'] = [pw.KEY_TABLE.index(c) for c in self.ui.pwAppendixEdit.text()]
+        self.selectedEntry['appendix'] = [pg.KEY_TABLE.index(c) for c in self.ui.pwAppendixEdit.text()]
         self.updateEntropy()
         
     def commitChanges(self):
