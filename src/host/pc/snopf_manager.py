@@ -275,6 +275,8 @@ class SnopfManager(QMainWindow):
             self.ui.keymapEdit.insert(pg.KEY_TABLE[key])
             
     def tabChanged(self, index):
+        if not self.selectedEntry:
+            return
         # Not really a change
         if index == self.lastTabIndex:
             return
@@ -304,6 +306,8 @@ class SnopfManager(QMainWindow):
     
     def updateSelectedEntry(self):
         '''Update currently selected entry with data from gui'''
+        if not self.selectedEntry:
+            return
         self.selectedEntry['password_length'] = self.ui.lengthSpinner.value()
         self.selectedEntry['password_iteration'] = self.ui.iterationSpinner.value()
         self.selectedEntry['rules'] = self.getRules()
