@@ -94,6 +94,11 @@ class SnopfWebsocketServer(QWebSocketServer):
             logger.info('got device-available msg')
             self.deviceAvailableRequest.emit(websocket)
         elif msg['cmd'] == 'password-request':
+            # This is always the last command
+            # and if we show an error message we get a segfault
+            # here for some reason, so for now we force close the
+            # connection after getting the request
+            websocket.close()
             logger.info('got password-request')
             data = msg['data']
             self.passwordRequest.emit(data['service'], data['account'], data['add_new_entries'])
