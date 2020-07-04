@@ -25,7 +25,6 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 import os
 import json
-import fcntl
 import copy
 from pathlib import Path
 import resources_rc
