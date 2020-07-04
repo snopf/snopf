@@ -29,6 +29,7 @@ import fcntl
 import copy
 from pathlib import Path
 import resources_rc
+from usb.core import USBError
 
 logger = snopf_logging.get_logger('main')
 
@@ -528,7 +529,12 @@ class SnopfManager(QMainWindow):
             QMessageBox.critical(self, 'Device not found', 'The device is not plugged in.', QMessageBox.Ok)
             return
         
-        usb_comm.send_message(dev, req)
+        try:
+            usb_comm.send_message(dev, req)
+        except USBError as e:
+            QMessageBox.critical(self, 'USB error', 'Cannot send to USB device. %s' % str(e), 
+                                 QMessageBox.Ok)
+            logger.error('USB Error', exc_info=sys.exc_info())
         
     def setKeyboardDelay(self):
         '''Set the keyboard delay for a connected snopf device'''
