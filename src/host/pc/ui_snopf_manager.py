@@ -24,7 +24,7 @@ class Ui_SnopfManager(object):
     def setupUi(self, SnopfManager):
         if not SnopfManager.objectName():
             SnopfManager.setObjectName(u"SnopfManager")
-        SnopfManager.resize(771, 524)
+        SnopfManager.resize(771, 611)
         sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -61,8 +61,8 @@ class Ui_SnopfManager(object):
         self.actionExit.setObjectName(u"actionExit")
         self.centralwidget = QWidget(SnopfManager)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.gridLayout_5 = QGridLayout(self.centralwidget)
-        self.gridLayout_5.setObjectName(u"gridLayout_5")
+        self.gridLayout_6 = QGridLayout(self.centralwidget)
+        self.gridLayout_6.setObjectName(u"gridLayout_6")
         self.splitter = QSplitter(self.centralwidget)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Horizontal)
@@ -77,22 +77,22 @@ class Ui_SnopfManager(object):
         self.accountTableWidget.setColumnCount(2)
         self.splitter.addWidget(self.accountTableWidget)
         self.accountTableWidget.header().setVisible(True)
-        self.layoutWidget = QWidget(self.splitter)
-        self.layoutWidget.setObjectName(u"layoutWidget")
-        self.verticalLayout_3 = QVBoxLayout(self.layoutWidget)
+        self.widget = QWidget(self.splitter)
+        self.widget.setObjectName(u"widget")
+        self.verticalLayout_5 = QVBoxLayout(self.widget)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
+        self.frame_2 = QFrame(self.widget)
+        self.frame_2.setObjectName(u"frame_2")
+        self.frame_2.setFrameShape(QFrame.StyledPanel)
+        self.frame_2.setFrameShadow(QFrame.Raised)
+        self.gridLayout_4 = QGridLayout(self.frame_2)
+        self.gridLayout_4.setObjectName(u"gridLayout_4")
+        self.verticalLayout_3 = QVBoxLayout()
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.tabWidget = QTabWidget(self.layoutWidget)
-        self.tabWidget.setObjectName(u"tabWidget")
-        self.generalTab = QWidget()
-        self.generalTab.setObjectName(u"generalTab")
-        self.gridLayout_2 = QGridLayout(self.generalTab)
+        self.gridLayout_2 = QGridLayout()
         self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.verticalLayout_2 = QVBoxLayout()
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.horizontalLayout_7 = QHBoxLayout()
-        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
-        self.label = QLabel(self.generalTab)
+        self.label = QLabel(self.frame_2)
         self.label.setObjectName(u"label")
         sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         sizePolicy1.setHorizontalStretch(0)
@@ -101,51 +101,84 @@ class Ui_SnopfManager(object):
         self.label.setSizePolicy(sizePolicy1)
         self.label.setMinimumSize(QSize(120, 0))
 
-        self.horizontalLayout_7.addWidget(self.label)
+        self.gridLayout_2.addWidget(self.label, 0, 0, 1, 1)
 
-        self.horizontalSpacer_3 = QSpacerItem(15, 20, QSizePolicy.Fixed, QSizePolicy.Minimum)
+        self.horizontalSpacer_4 = QSpacerItem(15, 20, QSizePolicy.Fixed, QSizePolicy.Minimum)
 
-        self.horizontalLayout_7.addItem(self.horizontalSpacer_3)
+        self.gridLayout_2.addItem(self.horizontalSpacer_4, 0, 1, 1, 1)
 
-        self.serviceEdit = QLineEdit(self.generalTab)
+        self.serviceEdit = QLineEdit(self.frame_2)
         self.serviceEdit.setObjectName(u"serviceEdit")
         self.serviceEdit.setReadOnly(True)
 
-        self.horizontalLayout_7.addWidget(self.serviceEdit)
+        self.gridLayout_2.addWidget(self.serviceEdit, 0, 2, 1, 1)
 
-
-        self.verticalLayout_2.addLayout(self.horizontalLayout_7)
-
-        self.horizontalLayout_6 = QHBoxLayout()
-        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.label_2 = QLabel(self.generalTab)
+        self.label_2 = QLabel(self.frame_2)
         self.label_2.setObjectName(u"label_2")
         sizePolicy1.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
         self.label_2.setSizePolicy(sizePolicy1)
         self.label_2.setMinimumSize(QSize(120, 0))
 
-        self.horizontalLayout_6.addWidget(self.label_2)
+        self.gridLayout_2.addWidget(self.label_2, 1, 0, 1, 1)
 
-        self.horizontalSpacer_4 = QSpacerItem(15, 20, QSizePolicy.Fixed, QSizePolicy.Minimum)
+        self.horizontalSpacer_3 = QSpacerItem(15, 20, QSizePolicy.Fixed, QSizePolicy.Minimum)
 
-        self.horizontalLayout_6.addItem(self.horizontalSpacer_4)
+        self.gridLayout_2.addItem(self.horizontalSpacer_3, 1, 1, 1, 1)
 
-        self.accountEdit = QLineEdit(self.generalTab)
+        self.accountEdit = QLineEdit(self.frame_2)
         self.accountEdit.setObjectName(u"accountEdit")
         self.accountEdit.setReadOnly(True)
 
-        self.horizontalLayout_6.addWidget(self.accountEdit)
+        self.gridLayout_2.addWidget(self.accountEdit, 1, 2, 1, 1)
 
 
-        self.verticalLayout_2.addLayout(self.horizontalLayout_6)
+        self.verticalLayout_3.addLayout(self.gridLayout_2)
 
-        self.line_3 = QFrame(self.generalTab)
-        self.line_3.setObjectName(u"line_3")
-        self.line_3.setFrameShape(QFrame.HLine)
-        self.line_3.setFrameShadow(QFrame.Sunken)
+        self.line_7 = QFrame(self.frame_2)
+        self.line_7.setObjectName(u"line_7")
+        self.line_7.setFrameShape(QFrame.HLine)
+        self.line_7.setFrameShadow(QFrame.Sunken)
 
-        self.verticalLayout_2.addWidget(self.line_3)
+        self.verticalLayout_3.addWidget(self.line_7)
 
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.requestPasswordButton = QPushButton(self.frame_2)
+        self.requestPasswordButton.setObjectName(u"requestPasswordButton")
+
+        self.horizontalLayout_6.addWidget(self.requestPasswordButton)
+
+        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_6.addItem(self.horizontalSpacer_6)
+
+        self.commitChangesButton = QPushButton(self.frame_2)
+        self.commitChangesButton.setObjectName(u"commitChangesButton")
+
+        self.horizontalLayout_6.addWidget(self.commitChangesButton)
+
+        self.deleteEntryButton = QPushButton(self.frame_2)
+        self.deleteEntryButton.setObjectName(u"deleteEntryButton")
+
+        self.horizontalLayout_6.addWidget(self.deleteEntryButton)
+
+
+        self.verticalLayout_3.addLayout(self.horizontalLayout_6)
+
+
+        self.gridLayout_4.addLayout(self.verticalLayout_3, 0, 0, 1, 1)
+
+
+        self.verticalLayout_5.addWidget(self.frame_2)
+
+        self.tabWidget = QTabWidget(self.widget)
+        self.tabWidget.setObjectName(u"tabWidget")
+        self.generalTab = QWidget()
+        self.generalTab.setObjectName(u"generalTab")
+        self.gridLayout_5 = QGridLayout(self.generalTab)
+        self.gridLayout_5.setObjectName(u"gridLayout_5")
+        self.verticalLayout_2 = QVBoxLayout()
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.label_4 = QLabel(self.generalTab)
@@ -266,26 +299,8 @@ class Ui_SnopfManager(object):
 
         self.verticalLayout_2.addItem(self.verticalSpacer_2)
 
-        self.horizontalLayout_10 = QHBoxLayout()
-        self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
-        self.horizontalSpacer_11 = QSpacerItem(15, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.horizontalLayout_10.addItem(self.horizontalSpacer_11)
-
-        self.requestPasswordButton = QPushButton(self.generalTab)
-        self.requestPasswordButton.setObjectName(u"requestPasswordButton")
-
-        self.horizontalLayout_10.addWidget(self.requestPasswordButton)
-
-        self.horizontalSpacer_12 = QSpacerItem(15, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_10.addItem(self.horizontalSpacer_12)
-
-
-        self.verticalLayout_2.addLayout(self.horizontalLayout_10)
-
-
-        self.gridLayout_2.addLayout(self.verticalLayout_2, 0, 0, 1, 1)
+        self.gridLayout_5.addLayout(self.verticalLayout_2, 0, 0, 1, 1)
 
         self.tabWidget.addTab(self.generalTab, "")
         self.rulesTab = QWidget()
@@ -460,39 +475,11 @@ class Ui_SnopfManager(object):
 
         self.tabWidget.addTab(self.keymapTab, "")
 
-        self.verticalLayout_3.addWidget(self.tabWidget)
+        self.verticalLayout_5.addWidget(self.tabWidget)
 
-        self.frame = QFrame(self.layoutWidget)
-        self.frame.setObjectName(u"frame")
-        self.frame.setFrameShape(QFrame.StyledPanel)
-        self.frame.setFrameShadow(QFrame.Raised)
-        self.gridLayout_4 = QGridLayout(self.frame)
-        self.gridLayout_4.setObjectName(u"gridLayout_4")
-        self.horizontalLayout_8 = QHBoxLayout()
-        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
-        self.deleteEntryButton = QPushButton(self.frame)
-        self.deleteEntryButton.setObjectName(u"deleteEntryButton")
+        self.splitter.addWidget(self.widget)
 
-        self.horizontalLayout_8.addWidget(self.deleteEntryButton)
-
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_8.addItem(self.horizontalSpacer)
-
-        self.commitChangesButton = QPushButton(self.frame)
-        self.commitChangesButton.setObjectName(u"commitChangesButton")
-
-        self.horizontalLayout_8.addWidget(self.commitChangesButton)
-
-
-        self.gridLayout_4.addLayout(self.horizontalLayout_8, 0, 0, 1, 1)
-
-
-        self.verticalLayout_3.addWidget(self.frame)
-
-        self.splitter.addWidget(self.layoutWidget)
-
-        self.gridLayout_5.addWidget(self.splitter, 0, 0, 1, 1)
+        self.gridLayout_6.addWidget(self.splitter, 0, 0, 1, 1)
 
         SnopfManager.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(SnopfManager)
@@ -528,7 +515,7 @@ class Ui_SnopfManager(object):
 
         self.retranslateUi(SnopfManager)
 
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(SnopfManager)
@@ -552,11 +539,13 @@ class Ui_SnopfManager(object):
         self.actionExit.setText(QCoreApplication.translate("SnopfManager", u"&Exit", None))
         self.label.setText(QCoreApplication.translate("SnopfManager", u"Service:", None))
         self.label_2.setText(QCoreApplication.translate("SnopfManager", u"Account:", None))
+        self.requestPasswordButton.setText(QCoreApplication.translate("SnopfManager", u"Request Password", None))
+        self.commitChangesButton.setText(QCoreApplication.translate("SnopfManager", u"Commit Changes", None))
+        self.deleteEntryButton.setText(QCoreApplication.translate("SnopfManager", u"Delete Entry", None))
         self.label_4.setText(QCoreApplication.translate("SnopfManager", u"Password Length:", None))
         self.label_3.setText(QCoreApplication.translate("SnopfManager", u"Password Iteration:", None))
         self.label_6.setText(QCoreApplication.translate("SnopfManager", u"Password Entropy:", None))
         self.label_9.setText(QCoreApplication.translate("SnopfManager", u"Comment:", None))
-        self.requestPasswordButton.setText(QCoreApplication.translate("SnopfManager", u"Request Password", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.generalTab), QCoreApplication.translate("SnopfManager", u"General", None))
         self.includeLowercaseCB.setText(QCoreApplication.translate("SnopfManager", u"Include lowercase", None))
         self.includeUppercaseCB.setText(QCoreApplication.translate("SnopfManager", u"Include uppercase", None))
@@ -577,8 +566,6 @@ class Ui_SnopfManager(object):
         self.label_5.setText(QCoreApplication.translate("SnopfManager", u"Select preset Keymap:", None))
         self.applyKeymapButton.setText(QCoreApplication.translate("SnopfManager", u"Apply", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.keymapTab), QCoreApplication.translate("SnopfManager", u"Keymap", None))
-        self.deleteEntryButton.setText(QCoreApplication.translate("SnopfManager", u"Delete Entry", None))
-        self.commitChangesButton.setText(QCoreApplication.translate("SnopfManager", u"Commit Changes", None))
         self.menuFile.setTitle(QCoreApplication.translate("SnopfManager", u"Fi&le", None))
         self.menuEntries.setTitle(QCoreApplication.translate("SnopfManager", u"E&ntries", None))
         self.menuAbout.setTitle(QCoreApplication.translate("SnopfManager", u"Abo&ut", None))
