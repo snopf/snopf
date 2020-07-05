@@ -77,12 +77,12 @@ class Ui_SnopfManager(object):
         self.accountTableWidget.setColumnCount(2)
         self.splitter.addWidget(self.accountTableWidget)
         self.accountTableWidget.header().setVisible(True)
-        self.widget = QWidget(self.splitter)
-        self.widget.setObjectName(u"widget")
-        self.verticalLayout_5 = QVBoxLayout(self.widget)
+        self.layoutWidget = QWidget(self.splitter)
+        self.layoutWidget.setObjectName(u"layoutWidget")
+        self.verticalLayout_5 = QVBoxLayout(self.layoutWidget)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
-        self.frame_2 = QFrame(self.widget)
+        self.frame_2 = QFrame(self.layoutWidget)
         self.frame_2.setObjectName(u"frame_2")
         self.frame_2.setFrameShape(QFrame.StyledPanel)
         self.frame_2.setFrameShadow(QFrame.Raised)
@@ -171,7 +171,7 @@ class Ui_SnopfManager(object):
 
         self.verticalLayout_5.addWidget(self.frame_2)
 
-        self.tabWidget = QTabWidget(self.widget)
+        self.tabWidget = QTabWidget(self.layoutWidget)
         self.tabWidget.setObjectName(u"tabWidget")
         self.generalTab = QWidget()
         self.generalTab.setObjectName(u"generalTab")
@@ -288,7 +288,7 @@ class Ui_SnopfManager(object):
 
         self.commentEdit = QLineEdit(self.generalTab)
         self.commentEdit.setObjectName(u"commentEdit")
-        self.commentEdit.setReadOnly(True)
+        self.commentEdit.setReadOnly(False)
 
         self.horizontalLayout_2.addWidget(self.commentEdit)
 
@@ -477,7 +477,7 @@ class Ui_SnopfManager(object):
 
         self.verticalLayout_5.addWidget(self.tabWidget)
 
-        self.splitter.addWidget(self.widget)
+        self.splitter.addWidget(self.layoutWidget)
 
         self.gridLayout_6.addWidget(self.splitter, 0, 0, 1, 1)
 
