@@ -9,8 +9,9 @@
 
 #include <avr/pgmspace.h>
 
-struct KB_REPORT kb_report = {
+struct KeyboardReport kb_report = {
     .modifier = 0,
+    .reserved = 0,
     .keycode = 0
 };
 
@@ -21,25 +22,34 @@ volatile uint8_t kb_idle_rate = 0;
 // This descriptor is taken from the HID Test program by Christian Starkjohann
 const char
     usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] PROGMEM = {
-        /* USB report descriptor */
-        0x05, 0x01, // USAGE_PAGE (Generic Desktop)
-        0x09, 0x06, // USAGE (Keyboard)
-        0xa1, 0x01, // COLLECTION (Application)
-        0x05, 0x07, //   USAGE_PAGE (Keyboard)
-        0x19, 0xe0, //   USAGE_MINIMUM (Keyboard LeftControl)
-        0x29, 0xe7, //   USAGE_MAXIMUM (Keyboard Right GUI)
-        0x15, 0x00, //   LOGICAL_MINIMUM (0)
-        0x25, 0x01, //   LOGICAL_MAXIMUM (1)
-        0x75, 0x01, //   REPORT_SIZE (1)
-        0x95, 0x08, //   REPORT_COUNT (8)
-        0x81, 0x02, //   INPUT (Data,Var,Abs)
-        0x95, 0x01, //   REPORT_COUNT (1)
-        0x75, 0x08, //   REPORT_SIZE (8)
-        0x25, 0x65, //   LOGICAL_MAXIMUM (101)
-        0x19, 0x00, //   USAGE_MINIMUM (Reserved (no event indicated))
-        0x29, 0x65, //   USAGE_MAXIMUM (Keyboard Application)
-        0x81, 0x00, //   INPUT (Data,Ary,Abs)
-        0xc0        // END_COLLECTION
+    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
+    0x09, 0x06,                    // USAGE (Keyboard)
+    0xa1, 0x01,                    // COLLECTION (Application)
+    0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
+    0x19, 0xe0,                    //   USAGE_MINIMUM (Keyboard LeftControl)
+    0x29, 0xe7,                    //   USAGE_MAXIMUM (Keyboard Right GUI)
+    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+    0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
+    0x75, 0x01,                    //   REPORT_SIZE (1)
+    0x95, 0x08,                    //   REPORT_COUNT (8)
+    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
+    0x95, 0x01,                    //   REPORT_COUNT (1)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x81, 0x03,                    //   INPUT (Cnst,Var,Abs)
+    0x95, 0x01,                    //   REPORT_COUNT (1)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+    0x25, 0x65,                    //   LOGICAL_MAXIMUM (101)
+    0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
+    0x19, 0x00,                    //   USAGE_MINIMUM (Reserved (no event indicated))
+    0x29, 0x65,                    //   USAGE_MAXIMUM (Keyboard Application)
+    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+    0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
+    0x95, 0x56,                    //   REPORT_COUNT (86)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x09, 0x00,                    //   USAGE (Reserved (no event indicated))
+    0xb1, 0x00,                    // FEATURE (Data,Ary,Abs)
+    0xc0                           // END_COLLECTION
 };
 
 // We'll have to wait for the USB host to be ready to receive the next
@@ -69,7 +79,10 @@ static inline void kb_send_report(void)
 int8_t kb_send_string(uint8_t* keycodes, uint8_t len)
 {
     for (uint8_t i = 0; i < len; i++) {
-        if (!(ee_access_get_keycode(keycodes[i], (uint8_t*)&kb_report))) {
+        if (!(ee_access_get_key_modifier(keycodes[i], &kb_report.modifier))) {
+            return 0;
+        }
+        if (!(ee_access_get_key_code(keycodes[i], &kb_report.keycode))) {
             return 0;
         }
         kb_send_report();

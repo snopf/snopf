@@ -40,7 +40,13 @@ def test_ee_access_read_keycodes_overflow():
     assert c_lib.ee_access_read_keycodes(b, 63, 2) == 0
     assert c_lib.ee_access_read_keycodes(b, 0, 44) == 0
 
-def test_ee_access_get_keycode_overflow():
-    b = (c_char * 2)()
-    assert c_lib.ee_access_get_keycode(0, b) == 1
-    assert c_lib.ee_access_get_keycode(64, b) == 0
+def test_ee_access_get_key_code_overflow():
+    b = (c_char * 1)()
+    assert c_lib.ee_access_get_key_code(0, b) == 1
+    assert c_lib.ee_access_get_key_code(64, b) == 0
+    
+def test_ee_access_get_key_modifier_overflow():
+    b = (c_char * 1)()
+    assert c_lib.ee_access_get_key_modifier(0, b) == 1
+    assert c_lib.ee_access_get_key_modifier(64, b) == 0
+    

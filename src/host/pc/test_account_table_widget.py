@@ -13,6 +13,8 @@ from pytestqt import *
 import pytest
 from PySide2.QtTest import *
 
+# FIXME Theses tests fail on Windows 10
+
 _account_table = {'service1': {'account1': {}, 'account2': {}, 'account3': {}},
                   'service2': {'account1': {}, 'account2': {}, 'account3': {}}}
 

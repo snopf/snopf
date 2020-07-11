@@ -12,6 +12,8 @@ from test_tools import *
 from pytestqt import *
 import json
 
+# FIXME Theses tests fail on Windows 10
+
 def _test_msg(qtbot, msg, signal_name):
     server = SnopfWebsocketServer(None, 50000)
     ws = QWebSocket()

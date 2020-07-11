@@ -24,8 +24,8 @@ STANDARD_SECRET = b'\x00' * 32
 
 def test_random_password_requests(num):
     
-    dev = get_standard_device()
     for i in range(num):
+        dev = get_standard_device()
         req_msg = os.urandom(16)
         length = random.randint(MIN_PW_LENGTH, MAX_PW_LENGTH)
         

@@ -7,12 +7,13 @@
 #include <stdint.h>
 
 // USB keyboard hid report, key modifier and key code
-struct KB_REPORT {
+struct KeyboardReport {
     uint8_t modifier;
+    uint8_t reserved;
     uint8_t keycode;
 } __attribute__((packed));
 
-extern struct KB_REPORT kb_report;
+extern struct KeyboardReport kb_report;
 
 // Send string to host
 int8_t kb_send_string(uint8_t* key_indices, uint8_t len);

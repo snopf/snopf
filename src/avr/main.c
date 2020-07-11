@@ -7,7 +7,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <string.h>
-
+#include "io_stuff.h"
 
 int main(void)
 {

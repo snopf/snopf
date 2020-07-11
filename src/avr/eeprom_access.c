@@ -72,14 +72,21 @@ EEMEM struct EEPROM_LAYOUT eeprom_layout = {
     }
 };
 
-
-int8_t ee_access_get_keycode(uint8_t index, uint8_t dst[2])
+int8_t ee_access_get_key_modifier(uint8_t index, uint8_t* modifier)
 {
     if (index >= 64) {
         return 0;
     }
-    dst[0] = eeprom_read_byte(&(eeprom_layout.keycodes[index][0]));
-    dst[1] = eeprom_read_byte(&(eeprom_layout.keycodes[index][1]));
+    *modifier = eeprom_read_byte(&(eeprom_layout.keycodes[index][0]));
+    return 1;
+}
+
+int8_t ee_access_get_key_code(uint8_t index, uint8_t* keycode)
+{
+    if (index >= 64) {
+        return 0;
+    }
+    *keycode = eeprom_read_byte(&(eeprom_layout.keycodes[index][1]));
     return 1;
 }
 

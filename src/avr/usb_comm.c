@@ -34,7 +34,7 @@ usbMsgLen_t usbFunctionSetup(uint8_t data[8])
             return sizeof(kb_report);
         case USBRQ_HID_SET_REPORT:
             // We ignore any LED settings etc.
-            return 0;
+            return USB_NO_MSG;
         case USBRQ_HID_GET_IDLE:
             // Unused, but required by USB HID spec
             usbMsgPtr = (uint8_t*)&kb_idle_rate;
@@ -47,6 +47,7 @@ usbMsgLen_t usbFunctionSetup(uint8_t data[8])
             return 0;
         }
     }
+    // TODO FIXME
     else if (rq->bmRequestType == USB_READ_RQ) {
             if (usb_read_buffer_ok) {
                 usbMsgPtr = (void*)usb_msg_buffer;
@@ -98,6 +99,7 @@ int8_t usb_comm_process_request(void)
                                             usb_data->length,
                                             usb_data->rules);
     if (!(success)) {
+        // TODO refactor buffer clearing copy/paste
         // This should not happen normally but just if the user sent
         // us an invalid request
         // Clear all buffers
@@ -142,6 +144,7 @@ int8_t usb_comm_process_message(void)
     switch (((uint8_t*)usb_msg_buffer)[0]) {
         case USB_MSG_FLAG_REQUEST:
             if (!io_wait_for_user_bttn()) {
+                // FIXME move the button press after the request has been processed
                 return 1;
             }
             ret = usb_comm_process_request();

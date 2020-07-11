@@ -10,7 +10,15 @@ Routines to communicate with the USB device using the pyUSB library.
 import usb.core
 import usb.util
 from hashlib import sha256
+import platform
+import hid
 
+use_hidapi = False
+if platform.system() == 'Windows':
+    use_hidapi = True
+    
+# FIXME reading / writing keyboard stuff with hidapi
+    
 class DeviceNotFound(Exception):
     pass
 
@@ -133,15 +141,34 @@ def send_message(dev, msg):
     the standard USB device will be used.
     (This should always be the case except for test cases)
     '''
+    if use_hidapi:
+        # We have to submit the report ID (0) when running windows
+        dev.send_feature_report(b'\x00' + msg)
+        dev.close()
+        return
     return dev.ctrl_transfer(VENDOR_REQUEST_NUM, 0, 0, 0, msg)
     
 def is_device_available():
     '''Test if the device is plugged in'''
+    if use_hidapi:
+        devs = hid.enumerate()
+        for dev in devs:
+            if dev['vendor_id'] == VENDOR_ID and dev['product_id'] == PRODUCT_ID:
+                return True
+        return False
+    
     dev = usb.core.find(idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
     return dev != None
     
 def get_standard_device():
     '''Get the real USB device'''
+    if use_hidapi:
+        dev = hid.device()
+        try:
+            dev.open(VENDOR_ID, PRODUCT_ID)
+        except OSError as e:
+            raise DeviceNotFound()
+        return dev
     dev = usb.core.find(idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
     if dev is None:
         raise DeviceNotFound()
