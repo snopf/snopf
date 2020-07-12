@@ -1,7 +1,9 @@
 ifeq ($(OS), Windows_NT)
 	TARGET = snopf_windows
+	remove = powershell Remove-Item -Recurse -ErrorAction Ignore -Path
 else
 	TARGET = snopf_linux
+	remove = rm -rf
 endif
 
 dist_path = ../dist/pc/
@@ -39,5 +41,5 @@ resources_rc.py:	resources.qrc
 	pyside2-rcc resources.qrc > resources_rc.py
 	
 clean:
-	rm -rf ../build
-	rm -rf ../dist
+	$(remove) ../build
+	$(remove) ../dist
