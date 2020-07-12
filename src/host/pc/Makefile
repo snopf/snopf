@@ -1,14 +1,27 @@
-all:	test snopf
-
 dist_path = ../dist/pc/
 work_path = ../build
 
-snopf:	gui $(wildcard *.py)
+ifeq ($(OS), Windows_NT)
+	TARGET = snopf_windows
+else
+	TARGET = snopf_linux
+endif
+
+all:	test $(TARGET)
+
+snopf_linux:	gui $(wildcard *.py)
 	bash insert_git_commit.sh
-	pyinstaller snopf_manager.py --distpath=$(dist_path) --workpath=$(work_path)/snopf_manager --specpath=$(work_path) --paths=. --name=snopf --noconfirm
+	pyinstaller snopf_manager.py --noconsole  --distpath=$(dist_path) --workpath=$(work_path)/snopf_manager --specpath=$(work_path) --paths=. --name=snopf --noconfirm
 	mv __get_commit_hash___ get_commit_hash.py
 	bash clean_up_pyinstaller.sh
 
+snopf_windows: gui $(wildcard *.py)
+	powershell .\insert_git_commit.ps1
+	pyinstaller snopf_manager.py --noconsole --distpath=$(dist_path) --workpath=$(work_path)/snopf_manager --specpath=$(work_path) --paths=. --name=snopf --noconfirm
+	powershell rm .\get_commit_hash.py
+	powershell Rename-Item -Path "__get_commit_hash___" -NewName "get_commit_hash.py"
+	powershell .\clean_up_pyinstaller.ps1
+	
 test:	
 	pytest
 
