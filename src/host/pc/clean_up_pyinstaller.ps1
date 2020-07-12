@@ -11,4 +11,4 @@ Remove-Item -Path ${dist_path}libQt5Multimedia.so.5 -ErrorAction Ignore
 Remove-Item -Path ${dist_path}libQt5Quick3DRuntimeRender.so.5 -ErrorAction Ignore
 Remove-Item -Path ${dist_path}PySide2/QtQml.abi3.so -ErrorAction Ignore
 Remove-Item -Path ${dist_path}PySide2/qml -Recurse -ErrorAction Ignore
- 
+Remove-Item -Path ${dist_path}libQt5Pdf.so -ErrorAction Ignore

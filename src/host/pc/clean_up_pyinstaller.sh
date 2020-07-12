@@ -11,4 +11,4 @@ rm -rf ${dist_path}libQt5Multimedia.so.5
 rm -rf ${dist_path}libQt5Quick3DRuntimeRender.so.5
 rm -rf ${dist_path}PySide2/QtQml.abi3.so
 rm -rf ${dist_path}PySide2/qml
- 
+rm -rf ${dist_path}libQt5Pdf.so
