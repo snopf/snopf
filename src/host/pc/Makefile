@@ -7,17 +7,19 @@ else
 	TARGET = snopf_linux
 endif
 
+PYINSTALL_CMD = pyinstaller snopf_manager.py --noconsole  --distpath=$(dist_path) --workpath=$(work_path)/snopf_manager --specpath=$(work_path) --paths=. --name=snopf --noconfirm
+
 all:	test $(TARGET)
 
 snopf_linux:	gui $(wildcard *.py)
 	bash insert_git_commit.sh
-	pyinstaller snopf_manager.py --noconsole  --distpath=$(dist_path) --workpath=$(work_path)/snopf_manager --specpath=$(work_path) --paths=. --name=snopf --noconfirm
+	$(PYINSTALL_CMD)
 	mv __get_commit_hash___ get_commit_hash.py
 	bash clean_up_pyinstaller.sh
 
 snopf_windows: gui $(wildcard *.py)
 	powershell .\insert_git_commit.ps1
-	pyinstaller snopf_manager.py --noconsole --distpath=$(dist_path) --workpath=$(work_path)/snopf_manager --specpath=$(work_path) --paths=. --name=snopf --noconfirm
+	powershell $(PYINSTALL_CMD)
 	powershell rm .\get_commit_hash.py
 	powershell Rename-Item -Path "__get_commit_hash___" -NewName "get_commit_hash.py"
 	powershell .\clean_up_pyinstaller.ps1
