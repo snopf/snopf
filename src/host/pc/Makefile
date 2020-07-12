@@ -1,13 +1,14 @@
-dist_path = ../dist/pc/
-work_path = ../build
-
 ifeq ($(OS), Windows_NT)
 	TARGET = snopf_windows
 else
 	TARGET = snopf_linux
 endif
 
-PYINSTALL_CMD = pyinstaller snopf_manager.py --noconsole  --distpath=$(dist_path) --workpath=$(work_path)/snopf_manager --specpath=$(work_path) --paths=. --name=snopf --noconfirm
+dist_path = ../dist/pc/
+work_path = ../build
+icon_path = ../../../art/icon/snopf.ico
+
+PYINSTALL_CMD = pyinstaller snopf_manager.py --noconsole  --distpath=$(dist_path) --workpath=$(work_path)/snopf_manager --specpath=$(work_path) --paths=. --name=snopf --noconfirm --icon=$(icon_path)
 
 all:	test $(TARGET)
 
