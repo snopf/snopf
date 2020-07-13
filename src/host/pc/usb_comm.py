@@ -29,6 +29,11 @@ PRODUCT_ID = 0x7370
 # ID for vendor specific requests
 VENDOR_REQUEST_NUM = 0x40
 
+# HID report request type (endpoint, class)
+HID_REPORT_REQUEST_TYPE = 0x22
+# HID report request
+USBRQ_HID_SET_REPORT = 0x09
+
 # ID for buffer read requests
 READ_REQUEST_NUM = 0xC0
 
@@ -146,7 +151,7 @@ def send_message(dev, msg):
         dev.send_feature_report(b'\x00' + msg)
         dev.close()
         return
-    return dev.ctrl_transfer(VENDOR_REQUEST_NUM, 0, 0, 0, msg)
+    return dev.ctrl_transfer(HID_REPORT_REQUEST_TYPE, USBRQ_HID_SET_REPORT, 0, 0, msg)
     
 def is_device_available():
     '''Test if the device is plugged in'''

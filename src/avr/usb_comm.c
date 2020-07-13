@@ -51,24 +51,18 @@ usbMsgLen_t usbFunctionSetup(uint8_t data[8])
             return 0;
         }
     }
-    // TODO FIXME
-    else if (rq->bmRequestType == USB_READ_RQ) {
-            if (usb_read_buffer_ok) {
-                usbMsgPtr = (void*)usb_msg_buffer;
-                // We allow reading out only once
-                usb_read_buffer_ok = 0;
-                // maximum number of valid bytes is 64, how much of that is
-                // valid data is up to the host to decide
-                return 64;
-            } else {
-                return 0;
-            }
-    } else if (rq->bmRequestType == USB_VENDOR_RQ) {
-        // Vendor specific request, tell host to use usbFunctionWrite to
-        // send data by returning USB_NO_MSG
-        return USB_NO_MSG;
-    }
-
+//     // TODO FIXME
+//     else if (rq->bmRequestType == USB_READ_RQ) {
+//             if (usb_read_buffer_ok) {
+//                 usbMsgPtr = (void*)usb_msg_buffer;
+//                 // We allow reading out only once
+//                 usb_read_buffer_ok = 0;
+//                 // maximum number of valid bytes is 64, how much of that is
+//                 // valid data is up to the host to decide
+//                 return 64;
+//             } else {
+//                 return 0;
+//             }
     // Ignore all other requests
     return 0;
 }
