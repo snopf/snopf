@@ -197,6 +197,7 @@ You are free to use it and copy it but it comes **without any guarantees**.
 ## Links
 
 * Snopf makes use of the excellent [V-USB driver](https://www.obdev.at/products/vusb/index.html)
+* Article about Snopf on [Hackaday](https://hackaday.com/tag/snopf/)
 
 ## License
 All code and schematics / hardware layouts are licensed under GNU General Public License (GPL) Version 2, see file License.txt.
