@@ -94,34 +94,38 @@ void pw_gen_map_to_keymap(uint8_t buffer[MAX_PW_LENGTH],
     }
 }
 
-int8_t pw_gen_generate_mapped(uint8_t work_buffer[256],
-                              uint8_t seed_buffer[32],
-                              const uint8_t secret[32],
-                              uint8_t message[16],
-                              const uint8_t keymap[64],
-                              uint8_t len, uint8_t rules)
+uint8_t* pw_gen_generate_mapped(const uint8_t secret[32],
+                               uint8_t message[16],
+                               const uint8_t keymap[64],
+                               uint8_t len, uint8_t rules)
 {
-    if ((len > MAX_PW_LENGTH) || (len < MIN_PW_LENGTH)) {
-        return 0;
-    }
-    for (uint8_t i = 0; i < 0xff; i++) {
-        sha256((uint32_t*)seed_buffer, (uint32_t*)secret,
-               (uint32_t*)message, (uint32_t*)work_buffer);
-        
-        pw_gen_base64(work_buffer, seed_buffer, len);
-        
-        // Apply all repeated / sequenced character rules
-        if (!(pw_gen_replace_reps_and_seqs(work_buffer, keymap, len, rules))) {
-            return 0;
+    static uint8_t work_buffer[PW_BUFFER_SIZE];
+    static uint8_t seed_buffer[32];
+    uint8_t* result = NULL;
+    
+    if ((len <= MAX_PW_LENGTH) && (len >= MIN_PW_LENGTH)) {
+        for (uint8_t i = 0; i < 0xff; i++) {
+            sha256((uint32_t*)seed_buffer, (uint32_t*)secret,
+                   (uint32_t*)message, (uint32_t*)work_buffer);
+            
+            pw_gen_base64(work_buffer, seed_buffer, len);
+            
+            // Apply all repeated / sequenced character rules
+            if (!(pw_gen_replace_reps_and_seqs(work_buffer, keymap, len, rules))) {
+                break;
+            }
+            
+            // Check that the password is valid for the chosen inclusion rules
+            if (pw_gen_check_inclusion_rules(work_buffer, keymap, len, rules)) {
+                // If the password is ok, we map the base64 result to the keymap
+                // indices
+                pw_gen_map_to_keymap(work_buffer, keymap, len);
+                result = work_buffer;
+                break;
+            }
+            message[0]++;
         }
-        // Check that the password is valid for the chosen inclusion rules
-        if (pw_gen_check_inclusion_rules(work_buffer, keymap, len, rules)) {
-            // If the password is ok, we map the base64 result to the keymap
-            // indices
-            pw_gen_map_to_keymap(work_buffer, keymap, len);
-            return 1;
-        }
-        message[0]++;
     }
-    return 0;
+    memset(seed_buffer, 0, 32);
+    return result;
 }

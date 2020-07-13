@@ -15,11 +15,8 @@ struct KeyboardReport {
 
 extern struct KeyboardReport kb_report;
 
-// Send string to host
-int8_t kb_send_string(uint8_t* key_indices, uint8_t len);
-
-// Hit enter
-void kb_hit_enter(void);
+// Type password into host device
+int8_t kb_send_password(uint8_t* password, int8_t len, uint8_t* appendix, int8_t hit_enter);
 
 // Required by HID standard (in 4 ms values)
 extern volatile uint8_t kb_idle_rate;

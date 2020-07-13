@@ -83,60 +83,32 @@ usbMsgLen_t usbFunctionWrite(uint8_t* data, uint8_t len)
     return usb_recv_bytes == USB_MSG_LENGTH;
 }
 
-int8_t usb_comm_process_request(void)
-{
-    // Working buffer for the SHA256 algorithm and buffer for the password
-    static uint8_t pw_work_buffer[256];
-    // Buffer for the SHA256 hash result
-    static uint8_t seed_buffer[32];
-       
-    struct USB_REQUEST* usb_data = (struct USB_REQUEST*)usb_msg_buffer;
- 
-    int8_t success = pw_gen_generate_mapped(pw_work_buffer, seed_buffer,
-                                            eeprom_layout.secret,
-                                            usb_data->request_msg,
-                                            usb_data->keymap,
-                                            usb_data->length,
-                                            usb_data->rules);
-    if (success) {
-        success = kb_send_string(pw_work_buffer, usb_data->length);
-    }
-    
-    // Send appendix if requested by user, values above 63 signal 'no appendix'
-    for (uint8_t i = 0; i < 3; i++) {
-        if (usb_data->appendix[i] >= 64) {
-            break;
-        }
-        if (success) {
-            success = kb_send_string((usb_data->appendix) + i, 1);
-        }
-    }
-
-    if (success) {
-        if (usb_data->rules & PW_GEN_HIT_ENTER) {
-            kb_hit_enter();
-        }
-    }
-    
-    // Clear all buffers
-    memset((uint8_t*)usb_msg_buffer, 0, USB_MSG_LENGTH);
-    memset(pw_work_buffer, 0, 256);
-    memset(seed_buffer, 0, 32);
-    
-    return success;
-}
-
 int8_t usb_comm_process_message(void)
 {
     int8_t ret = 0;
     switch (((uint8_t*)usb_msg_buffer)[0]) {
         case USB_MSG_FLAG_REQUEST:
-            if (!io_wait_for_user_bttn()) {
-                // FIXME move the button press after the request has been processed
-                return 1;
+        {
+            struct USB_REQUEST* usb_msg = (struct USB_REQUEST*)usb_msg_buffer;
+            uint8_t* password = pw_gen_generate_mapped(eeprom_layout.secret,
+                                                       usb_msg->request_msg,
+                                                       usb_msg->keymap,
+                                                       usb_msg->length,
+                                                       usb_msg->rules);
+            if (password == NULL) {
+                ret = 0;
+            } else {
+                ret = 1;
             }
-            ret = usb_comm_process_request();
-            break;
+            if (ret) {
+                if (io_wait_for_user_bttn()) {
+                    ret = kb_send_password(password, usb_msg->length, usb_msg->appendix,
+                                           usb_msg->rules & PW_GEN_HIT_ENTER);
+                }
+            }
+            memset(password, 0, PW_BUFFER_SIZE);
+            memset((uint8_t*)usb_msg_buffer, 0, USB_MSG_LENGTH);
+        } break;
         
         case USB_MSG_FLAG_KEYBOARD_READ:
         {

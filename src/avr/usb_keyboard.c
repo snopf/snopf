@@ -96,3 +96,26 @@ void kb_hit_enter(void)
     kb_report.keycode = 0x28;
     kb_send_report();
 }
+
+int8_t kb_send_password(uint8_t* password, int8_t len, uint8_t* appendix, int8_t hit_enter)
+{
+    int8_t success = kb_send_string(password, len);
+    
+    // Send appendix if requested by user, values above 63 signal 'no appendix'
+    for (uint8_t i = 0; i < 3; i++) {
+        if (appendix[i] >= 64) {
+            break;
+        }
+        if (success) {
+            success = kb_send_string((appendix) + i, 1);
+        }
+    }
+    
+    if (success) {
+        if (hit_enter) {
+            kb_hit_enter();
+        }
+    }
+    
+    return success;
+}

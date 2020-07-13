@@ -25,15 +25,17 @@
 // Maximum length of a generated password (32 bytes * 8 / 6)
 #define MAX_PW_LENGTH 42
 
+// Length of a password buffer
+#define PW_BUFFER_SIZE 256
+
 /*
  * Generate a base64 password combination for the given rules.
- * Returns 1 if a password could be generated, 0 else.
+ * Returns a pointer to the generated password in case of success.
+ * In case of failure NULL pointer is returned.
  */
-int8_t pw_gen_generate_mapped(uint8_t work_buffer[256],
-                              uint8_t seed_buffer[32],
-                              const uint8_t secret[16],
-                              uint8_t message[16],
-                              const uint8_t keymap[64],
-                              uint8_t len, uint8_t rules);
+uint8_t* pw_gen_generate_mapped(const uint8_t secret[16],
+                                uint8_t message[16],
+                                const uint8_t keymap[64],
+                                uint8_t len, uint8_t rules);
 
 #endif  //__password_generator_h__
