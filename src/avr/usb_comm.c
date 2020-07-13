@@ -98,24 +98,8 @@ int8_t usb_comm_process_request(void)
                                             usb_data->keymap,
                                             usb_data->length,
                                             usb_data->rules);
-    if (!(success)) {
-        // TODO refactor buffer clearing copy/paste
-        // This should not happen normally but just if the user sent
-        // us an invalid request
-        // Clear all buffers
-        memset((uint8_t*)usb_msg_buffer, 0, USB_MSG_LENGTH);
-        memset(pw_work_buffer, 0, 256);
-        memset(seed_buffer, 0, 32);
-        return 0;
-    }
-    
-    if (!kb_send_string(pw_work_buffer, usb_data->length)) {
-        // We might fail if the host sent us a keymap with keys outside
-        // of the key area
-        memset((uint8_t*)usb_msg_buffer, 0, USB_MSG_LENGTH);
-        memset(pw_work_buffer, 0, 256);
-        memset(seed_buffer, 0, 32);
-        return 0;
+    if (success) {
+        success = kb_send_string(pw_work_buffer, usb_data->length);
     }
     
     // Send appendix if requested by user, values above 63 signal 'no appendix'
@@ -123,11 +107,15 @@ int8_t usb_comm_process_request(void)
         if (usb_data->appendix[i] >= 64) {
             break;
         }
-        kb_send_string((usb_data->appendix) + i, 1); 
+        if (success) {
+            success = kb_send_string((usb_data->appendix) + i, 1);
+        }
     }
 
-    if (usb_data->rules & PW_GEN_HIT_ENTER) {
-        kb_hit_enter();
+    if (success) {
+        if (usb_data->rules & PW_GEN_HIT_ENTER) {
+            kb_hit_enter();
+        }
     }
     
     // Clear all buffers
@@ -135,7 +123,7 @@ int8_t usb_comm_process_request(void)
     memset(pw_work_buffer, 0, 256);
     memset(seed_buffer, 0, 32);
     
-    return 1;
+    return success;
 }
 
 int8_t usb_comm_process_message(void)
