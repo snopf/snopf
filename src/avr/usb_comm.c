@@ -33,7 +33,11 @@ usbMsgLen_t usbFunctionSetup(uint8_t data[8])
             usbMsgPtr = (void*)&kb_report;
             return sizeof(kb_report);
         case USBRQ_HID_SET_REPORT:
-            // We ignore any LED settings etc.
+            if (rq->wLength.word != USB_MSG_LENGTH) {
+                // Ignore requests of wrong length
+                return 0;
+            }
+            // We abuse the feature report for sending data to us
             return USB_NO_MSG;
         case USBRQ_HID_GET_IDLE:
             // Unused, but required by USB HID spec
