@@ -113,38 +113,58 @@ There are links for Mouser parts that work for the PCB layout to be found in the
 A 3D printable casing can be found at `hardware/casing` both as a FreeCAD file and as four STEP files (bottom, top, button and a cap for the USB plug). The button is designed as a silicone button so that the diffuse LED light can been seen through it.
 The dimensions of the casing are 41.9 x 19.4 x 11 mm.
 
-## Building the Firmware and Host Software
+## Running and building the Snopf software
 
-For running the python code and building the Snopf tools you should create a virtualenv by running 
+### Python Venv
+To avoid bugs and conflicts due to different versions of installed python packages it is advised to initialize a Python virtual enviroment for all operations described in this section. This includes running the python code as well as building binaries for either the AVR or the PC. Alternatively you can have a look at `src/py_requirements.txt` to see which Python packages and which versions are used for Snopf and install them accordingly.
+To create a Python Venv you can simpy run
 ```
 $ ./setup_py_env.sh
 ```
-in the `src` directory.
-
-All AVR code is located in `src/avr` and all other code in `src/host`.
-
-You can compile the AVR code and program the AVR using the standard GNU toolchain using
+in the Linux console and
 ```
-$ make program
+$ ./setup_py_env.ps1
 ```
-in the avr source directory. You'll probably have to alter the `Makefile` for your kind of programmer.
-
-There also exists a bootloader written for this project, you can find it here [Snopf bootloader](https://github.com/Snopf/Snopf_bootloader) so that you can update the code on the device via USB. The bootloader is not necessary but it comes in handy for updating the firmware.
-
-----
-
-To build the binaries for `Snopf QT` from the python sources using PyInstaller, run
+in the Windows PowerShell. This will create a `.venv` directory with all necessary packages installed and activate that virtual enviroment for the current session.
+To activate the virtual enviroment for the current session you run
 ```
-$ make
+$ source .venv/bin/activate
 ```
-in `src/host/pc`. The output directory for the binaries is `src/host/dist/snopf`.
+in the Linux console and
+```
+$ ./.venv/scripts/activate.ps1
+```
+in the Windows PowerShell.
 
-You can also run `make` in the parent directory to also pack the browser extension (see below).
-
+### Linux udev rule
 There is an udev rule for allowing USB acces to Snopf located in `src/host` which you can copy to `/etc/udev/rules.d` or you can simply run
 ```
 $ ./install_usb_rule.sh
 ```
+
+### Building the Firmware
+You can compile the AVR code and program the AVR using the standard GNU toolchain using
+```
+$ make program
+```
+in the avr source directory `src/avr`. You'll probably have to alter the `Makefile` for your kind of programmer.
+
+There also exists a bootloader written for this project, you can find it here [Snopf bootloader](https://github.com/Snopf/Snopf_bootloader) so that you can update the code on the device via USB. The bootloader is not necessary but it comes in handy for updating the firmware.
+
+### Running the Snopf QT Python code
+After activating the Python virtual enviroment you can run the QT app as a Python script by running
+```
+python snopf_manager.py
+```
+in `src/host/pc`.
+
+### Building Snopf QT Binaries for Linux
+You can build a stand-alone binary for Snopf using PyInstaller. Just run `make` in `src/host/pc`.
+It is advised to run `make` in the Python virtual enviroment to ensure that all needed packages are installed using the correct version.
+The output will be created in `src/host/dist`.
+
+### Building Snopf QT Binaries for Windows
+You can build an executable for Windows using the same Makefile as for Linux. You will have to have [GNU make for Windows](http://gnuwin32.sourceforge.net/packages/make.htm) installed. All scripts are written for PowerShell so you have to run Make from PowerShell.
 
 ### Browser extension
 The firefox extension is located at `src/host/browser_extension` and can be packed into a zip file suitable for the browser by simply running `make` there.
