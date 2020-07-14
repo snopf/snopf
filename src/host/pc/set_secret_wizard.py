@@ -35,6 +35,9 @@ class SetSecretWizard(QWizard):
         
         self.mnemonic = []
         
+        # We might have random HTML input from the generated passwords
+        self.ui.expectedPasswordLabel.setTextFormat(Qt.PlainText)
+        
         for i in self.pageIds():
             self.page(i).setCommitPage(True)
             self.page(i).setButtonText(QWizard.CommitButton, 'Next')
