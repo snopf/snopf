@@ -14,9 +14,7 @@ volatile uint8_t usb_msg_recv = 0;
 
 // Number of received bytes
 static volatile uint16_t usb_recv_bytes = 0;
-// Number of expected bytes for the current message
-// This is also a flag for a currently running request, while usb_expected_bytes != 0 we
-// will not accept a new request
+// Number of bytes we expect for the current message (when using windows this will always be 129)
 static volatile uint16_t usb_expected_bytes = 0;
 
 /*
@@ -25,9 +23,9 @@ static volatile uint16_t usb_expected_bytes = 0;
  * roles
  */
 
-// The buffer size is due to the largest msg type (standard password request + the necessary SHA256
-// working array) plus an extra byte for the msg_type flag
-#define USB_BUFFER_SIZE 342
+// The size of the USB message buffer is the maximum message (128 keycodes + 1 msg type byte)
+// Note that the actual size of the buffer union is much larger (342) bytes due to shared memory
+#define USB_BUFFER_SIZE 192
 
 // Minimum message size is a keyboard change, one flag byte + one new keyboard delay byte
 #define USB_MIN_MSG_SIZE 2
@@ -80,7 +78,7 @@ volatile union {
     
     // Buffer for usbWrite
     uint8_t msg_buffer[USB_BUFFER_SIZE];
-} usb_msg;
+} shared_buffer;
 
 // Simplified USB HID descriptor for a keyboard with a 2 byte report
 // This descriptor is taken from the HID Test program by Christian Starkjohann
@@ -109,7 +107,7 @@ const char
     0x29, 0x65,                    //   USAGE_MAXIMUM (Keyboard Application)
     0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
     0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
-    0x95, 0x56,                    //   REPORT_COUNT (86)
+    0x95, 0x81,                    //   REPORT_COUNT (192)
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x09, 0x00,                    //   USAGE (Reserved (no event indicated))
     0xb1, 0x00,                    // FEATURE (Data,Ary,Abs)
@@ -156,7 +154,7 @@ usbMsgLen_t usbFunctionWrite(uint8_t* data, uint8_t len)
     if ((usb_recv_bytes + len) > usb_expected_bytes) {
         io_failure_shutdown();
     }
-    memcpy(((uint8_t*)usb_msg.msg_buffer)+usb_recv_bytes, data, len);
+    memcpy(((uint8_t*)shared_buffer.msg_buffer)+usb_recv_bytes, data, len);
     usb_recv_bytes += len;
     if (usb_recv_bytes == usb_expected_bytes) {
         // Set flag for main loop
@@ -183,23 +181,20 @@ usbMsgLen_t usbFunctionWrite(uint8_t* data, uint8_t len)
 
 static int8_t process_password_request(void)
 {
-    if (usb_recv_bytes != USB_MSG_LEN_REQUEST) {
-        return 0;
-    }
-    int8_t success = pw_gen_generate_mapped((uint8_t*)usb_msg.password_result,
+    int8_t success = pw_gen_generate_mapped((uint8_t*)shared_buffer.password_result,
                                             eeprom_layout.secret,
-                                            (uint8_t*)usb_msg.password_request_msg,
-                                            (uint8_t*)usb_msg.password_keymap,
-                                            (uint8_t)usb_msg.password_length,
-                                            (uint8_t)usb_msg.password_rules);
+                                            (uint8_t*)shared_buffer.password_request_msg,
+                                            (uint8_t*)shared_buffer.password_keymap,
+                                            (uint8_t)shared_buffer.password_length,
+                                            (uint8_t)shared_buffer.password_rules);
     if (!success) {
         return 0;
     }
     if (io_wait_for_user_bttn()) {
-        return kb_send_password((uint8_t*)usb_msg.password_result,
-                                (uint8_t)usb_msg.password_length,
-                                (uint8_t*)usb_msg.password_appendix,
-                                ((uint8_t)usb_msg.password_rules) & PW_GEN_HIT_ENTER);
+        return kb_send_password((uint8_t*)shared_buffer.password_result,
+                                (uint8_t)shared_buffer.password_length,
+                                (uint8_t*)shared_buffer.password_appendix,
+                                ((uint8_t)shared_buffer.password_rules) & PW_GEN_HIT_ENTER);
     }
     // User did not press the button but no failure either
     return 1;
@@ -207,42 +202,32 @@ static int8_t process_password_request(void)
 
 static int8_t process_secret_request(void)
 {
-    if (usb_recv_bytes != USB_MSG_LEN_SET_SECRET) {
-        return 0;
-    }
     if (io_wait_for_user_bttn_hold()) {
-        ee_access_set_secret((uint8_t*)usb_msg.secret);
+        ee_access_set_secret((uint8_t*)shared_buffer.secret);
     }
     return 1;
 }
 
 static int8_t process_set_kb_delay(void)
 {
-    if (usb_recv_bytes != USB_MSG_LEN_SET_KB_DELAY) {
-        return 0;
-    }
     if (io_wait_for_user_bttn()) {
-        ee_access_set_keyboard_delay(usb_msg.kb_delay);
+        ee_access_set_keyboard_delay(shared_buffer.kb_delay);
     }
     return 1;
 }
 
 static int8_t process_set_keyboard_codes(void)
 {
-    if (usb_recv_bytes != USB_MSG_LEN_SET_KEYBOARD_CODES) {
-        return 0;
-    }
     if (io_wait_for_user_bttn_hold()) {
-        ee_access_set_keyboard_codes((uint8_t*)usb_msg.keyboard_codes);
+        ee_access_set_keyboard_codes((uint8_t*)shared_buffer.keyboard_codes);
     }
     return 1;
 }
 
-
 int8_t usb_comm_process_message(void)
 {
     int8_t ret_val = 0; 
-    switch (usb_msg.msg_type) {
+    switch (shared_buffer.msg_type) {
         case USB_MSG_FLAG_REQUEST:
             ret_val = process_password_request();
             break;
@@ -258,7 +243,7 @@ int8_t usb_comm_process_message(void)
     }
     
     // Clear the buffer
-    memset((void*)usb_msg.msg_buffer, 0, USB_BUFFER_SIZE);
+    memset((void*)&shared_buffer, 0, sizeof(shared_buffer));
     return ret_val;
 }
 

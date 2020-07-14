@@ -14,8 +14,10 @@ import platform
 import hid
 
 use_hidapi = False
+windows = False
 if platform.system() == 'Windows':
     use_hidapi = True
+    windows = True
         
 class DeviceNotFound(Exception):
     pass
@@ -42,11 +44,18 @@ MSG_LEN_SET_KB_DELAY = 2
 MSG_FLAG_SET_KEYBOARD_CODES = (1 << 3).to_bytes(1, 'little')
 MSG_LEN_SET_KEYBOARD_CODES = 129
 
+# Maximum USB message length (128 keycodes + message type)
+MAX_USB_MSG_LEN = 129
+
 def send_message(dev, msg):
     '''Send the raw byte message to the device dev'''
     if use_hidapi:
-        # We have to submit the report ID (0) when running windows
-        dev.send_feature_report(b'\x00' + msg)
+        if windows:
+            # We have to submit the report ID (0) when running windows
+            msg = b'\x00' + msg
+            # And we always have to send the exact same length of messages
+            msg += b'\x00' * (MAX_USB_MSG_LEN - len(msg))
+        dev.send_feature_report(msg)
         dev.close()
         return
     return dev.ctrl_transfer(HID_REPORT_REQUEST_TYPE, USBRQ_HID_SET_REPORT, 0, 0, msg)
