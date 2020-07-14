@@ -1,6 +1,8 @@
 # Snopf USB password token
 
-** Info: The password creation algorithm for Snopf has been fundamentally changed since 6b1df42b0c21d2e936d6018c70f1937114251a39. The new firmware and the new tools and account table files aren't compatible with the former version. The command line tool has been deprecated. Snopf also switched from using a 128 bit secret to using a 256 bit secret on the device. For upgrading the firmware you can use the firmware updater from the bootloader repository [here.](https://github.com/Snopf/Snopf_bootloader). For installation and configuration follow this readme.**
+```
+Info: The password creation algorithm for Snopf has been fundamentally changed since 6b1df42b0c21d2e936d6018c70f1937114251a39. The new firmware and the new tools and account table files aren't compatible with the former version. The command line tool has been deprecated. Snopf also switched from using a 128 bit secret to using a 256 bit secret on the device. For upgrading the firmware you can use the firmware updater from the bootloader repository [here.](https://github.com/Snopf/Snopf_bootloader). For installation and configuration follow this readme.
+```
 
 ## What is Snopf?
 
@@ -30,7 +32,7 @@ Instructions on how to build your own are found in the section *Hardware* and *B
 Common software password managers are very good tools to create and manage strong passwords for all your logins. Still, there is a possibility of your computer being remotely attacked and an attacker is able to access your password database getting all your login credentials.
 Snopf is an improvement over these managers because an attacker can't access your Snopf token remotely. All passwords are derived from the secret on the device which an attacker must have phyiscal access to. So there is an additional *physical barrier* for an attacker.
 
-![conventional_vs_Snopf](readme/conventional_vs_Snopf.png)
+![conventional_vs_Snopf](readme/conventional_vs_snopf.png)
 
 ## Using Snopf
 <!-- TODO show detailed 'how to use' -->
@@ -44,8 +46,8 @@ With Snopf-QT you can create new entries, delete entries and change entries in t
 2. `Account` = Your account at this service, for example the email address for the email service `my_mail_address@examplemail.com`
 3. `Password length` = The password length you set for this service
 4. `Password iteration` = An integer for every unique (service, account) combination which you increase if you have to set a new password for this combination for example after a databreach at the used service.
-5. 'Rules' = Rules for password creation, for example 'The password must include a lowercase character'
-6. 'Keymap' = A keymap which will be used for the password creation which allows to include and exclude certain characters
+5. `Rules` = Rules for password creation, for example 'The password must include a lowercase character'
+6. `Keymap` = A keymap which will be used for the password creation which allows to include and exclude certain characters
 
 The account table file is AES encrypted on the hard disk using the same master password (not the master secret on the USB device!) that is used whenever a password request is submitted.
 
@@ -187,7 +189,12 @@ about:debugging#/runtime/this-firefox
 into the adress bar and and clicking *Load Temporary Add-on...*.
 
 ### Android App
+An Android App is in development for the new Snopf algorithm.
+<!-- 
 The Android App is located at `src/host/android` as an project for `androidstudio` and can be build and applied to an Android phone using the same.
+ -->
+
+
 
 ## Disclaimer
 There is no warranty for data security and integrity or security issues of any kind. Care has been taken to make this a device that increases your security, however security bugs are possible.
