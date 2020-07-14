@@ -30,12 +30,12 @@
 
 /*
  * Generate a base64 password combination for the given rules.
- * Returns a pointer to the generated password in case of success.
- * In case of failure NULL pointer is returned.
+ * Return 1 in case of success else 0
  */
-uint8_t* pw_gen_generate_mapped(const uint8_t secret[16],
-                                uint8_t message[16],
-                                const uint8_t keymap[64],
-                                uint8_t len, uint8_t rules);
+int8_t pw_gen_generate_mapped(uint8_t password_buffer[PW_BUFFER_SIZE],
+                              const uint8_t secret[16],
+                              uint8_t message[16],
+                              const uint8_t keymap[64],
+                              uint8_t len, uint8_t rules);
 
 #endif  //__password_generator_h__

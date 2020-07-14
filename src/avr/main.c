@@ -23,14 +23,12 @@ int main(void)
     while (1) {
         usbPoll();
         // Wait for a completed USB message
-        if (usb_recv_bytes == USB_MSG_LENGTH) {
+        if (usb_msg_recv) {
             if (!(usb_comm_process_message())) {
-                // Clear buffer and go into shutdown mode
-                memset((uint8_t*)usb_msg_buffer, 0, USB_MSG_LENGTH);
                 io_failure_shutdown();
             }
-            // Get ready for accepting new messages
-            usb_recv_bytes = 0;
+            // Reset communication status to allow new messages
+            usb_comm_reset();
         }
     }
     return 0;

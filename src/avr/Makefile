@@ -109,7 +109,7 @@ override CFLAGS += -g$(DEBUG)
 override CFLAGS += $(CDEFS) $(CINCS)
 override CFLAGS += -O$(OPT)
 override CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
-override CFLAGS += -Wall -Wstrict-prototypes
+override CFLAGS += -Wall -Wstrict-prototypes -Werror
 override CFLAGS += -Wa,-adhlns=$(<:.c=.lst)
 override CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 override CFLAGS += $(CSTANDARD)

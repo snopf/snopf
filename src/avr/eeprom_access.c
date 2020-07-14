@@ -72,6 +72,21 @@ EEMEM struct EEPROM_LAYOUT eeprom_layout = {
     }
 };
 
+void ee_access_set_secret(const uint8_t secret[32])
+{
+    eeprom_update_block(secret, eeprom_layout.secret, 32);
+}
+
+void ee_access_set_keyboard_delay(uint8_t delay)
+{
+    eeprom_update_byte(&eeprom_layout.kb_delay, delay);
+}
+
+void ee_access_set_keyboard_codes(const uint8_t keyboard_codes[128])
+{
+    eeprom_update_block(keyboard_codes, (uint8_t*)eeprom_layout.keycodes, 128);
+}
+
 int8_t ee_access_get_key_modifier(uint8_t index, uint8_t* modifier)
 {
     if (index >= 64) {
@@ -87,48 +102,5 @@ int8_t ee_access_get_key_code(uint8_t index, uint8_t* keycode)
         return 0;
     }
     *keycode = eeprom_read_byte(&(eeprom_layout.keycodes[index][1]));
-    return 1;
-}
-
-int8_t ee_access_write_protected(uint16_t addr, uint8_t* data, uint8_t len)
-{
-    if ((addr >= 0x200) || ((addr + len) > 0x200)) {
-        // Trying to write over the last eeprom address (512 bytes)
-        // or to a non existing address
-        return 0;
-    }
-    eeprom_update_block(data, ((uint8_t*)&eeprom_layout) + addr, len);
-    return 1;
-}
-
-int8_t ee_access_write_unprotected(uint16_t addr, uint8_t* data, uint8_t len)
-{
-    if (((uint8_t*)(&eeprom_layout) + addr) < (uint8_t*)&(eeprom_layout.kb_delay)) {
-        // Trying to write to protected space
-        return 0;
-    }
-    return ee_access_write_protected(addr, data, len);
-}
-
-int8_t ee_access_read_keycodes(uint8_t buffer[86], uint8_t _begin, uint8_t _num)
-{
-    // We have to copy begin and len in order not to overwrite them
-    uint8_t begin = _begin;
-    uint8_t num = _num;
-    // We store 64 keys
-    if ((begin + num) > 64) {
-        return 0;
-    }
-    // We don't want to overflow the buffer
-    if (num > (86 / 2)) {
-        return 0;
-    }
-    eeprom_read_block(buffer, &(eeprom_layout.keycodes[begin]), num * 2);
-    return 1;
-}
-
-int8_t ee_access_read_kb_delay(uint8_t* buffer)
-{
-    buffer[0] = eeprom_read_byte(&eeprom_layout.kb_delay);
     return 1;
 }

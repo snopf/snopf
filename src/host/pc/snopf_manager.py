@@ -522,7 +522,7 @@ class SnopfManager(QMainWindow):
         req_msg = requests.combine_standard_request(service.encode(), account.encode(),
                                                     self.masterPassphrase, password_iteration)
         
-        req = usb_comm.build_request(req_msg, password_length, rules, appendix, keymap)
+        req = usb_comm.build_request_message(req_msg, password_length, rules, appendix, keymap)
         dev = usb_comm.get_standard_device()
         if not dev:
             QMessageBox.critical(self, 'Device not found', 'The device is not plugged in.', QMessageBox.Ok)
@@ -544,9 +544,10 @@ class SnopfManager(QMainWindow):
                                      QMessageBox.Ok)
                 return
             dev = usb_comm.get_standard_device()
-            usb_comm.write_keyboard_delay(dev, delay)
+            msg = usb_comm.build_set_keyboard_delay_message(delay)
+            usb_comm.send_message(dev, msg)
             QMessageBox.information(self, 'Setting Keyboard Delay',
-                                    'Press the Button on the device for five seconds.',
+                                    'Press the Button on the device to set the new delay.',
                                     QMessageBox.Ok)
     
     def askUser(self, title, question):

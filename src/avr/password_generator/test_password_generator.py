@@ -26,23 +26,24 @@ def test_pw_gen_base64():
                 assert outp == test['outp']
 
 def test_pw_gen_generate_mapped():
-    pw_gen_generate_mapped = c_lib.pw_gen_generate_mapped
-    pw_gen_generate_mapped.restype = POINTER(c_char)
     with open('../test_data/test_vectors_passwords.json') as f:
         tests = json.load(f)
         
         keymap = (c_char * 64)()
-                
+        
+        password_buffer = (c_char * 256)()
+        
         for test in tests:
             for i in range(64):
                 keymap[i] = test['keymap'][i]
             secret = get_bytes_from_json(test['secret'])
             message = get_bytes_from_json(test['message'])
             
-            password = pw_gen_generate_mapped(secret, message, keymap, test['length'], test['rules'])
+            res = c_lib.pw_gen_generate_mapped(password_buffer, secret, message, keymap,
+                                               test['length'], test['rules'])
             
             for i in range(test['length']):
-                assert  password[:test['length']] == b''.join(
+                assert  password_buffer[:test['length']] == b''.join(
                     [int.to_bytes(i, 1, 'little') for i in test['mapped_password']])
                 
 PW_GEN_INCLUDE_GROUP_1 = (1 << 0)

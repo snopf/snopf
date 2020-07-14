@@ -7,6 +7,7 @@
 QT Wizard for setting the secret 
 '''
 
+# TODO add a "new secret successfully set message"
 # TODO dice rolls etc.
 
 from ui_set_secret_wizard import Ui_SetSecretWizard
@@ -59,12 +60,13 @@ class SetSecretWizard(QWizard):
                 return
             
             self.dev = usb_comm.get_standard_device()
-            usb_comm.write_secret(self.dev, mnemonic.to_entropy(self.mnemonic))
+            msg = usb_comm.build_new_secret_message(mnemonic.to_entropy(self.mnemonic))
+            usb_comm.send_message(self.dev, msg)
         
         elif (_id) == 3:
             logger.info('Starting challenge response')
             rq = os.urandom(16)
-            msg = usb_comm.build_request(rq, 42, 0, [], pg.keymaps['all'])
+            msg = usb_comm.build_request_message(rq, 42, 0, [], pg.keymaps['all'])
             usb_comm.send_message(self.dev, msg)
             expected = pg.get_mapped_password(
                 mnemonic.to_entropy(self.mnemonic), rq, 42, 0, pg.keymaps['all'])
@@ -92,7 +94,7 @@ class SetSecretWizard(QWizard):
             return True
         
         if self.currentId() == 3:
-            logger.error('Checking challenge response')
+            logger.info('Checking challenge response')
             if self.ui.expectedPasswordLabel.text() != self.ui.passwordEdit.text():
                 logger.error('Challenge response failed %s != %s' % (
                     self.ui.expectedPasswordLabel.text(), self.ui.passwordEdit.text()))
@@ -101,7 +103,7 @@ class SetSecretWizard(QWizard):
                     'The passwords do not match. Something went wrong.',
                     QMessageBox.Ok)
                 return False
-            logger.error('Check ok')
+            logger.info('Check ok')
             return True
         
         return True
