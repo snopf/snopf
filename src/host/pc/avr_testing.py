@@ -44,7 +44,7 @@ def test_random_password_requests(num):
                                   rules, kmap)
         append_keys(exp, appendix)
         print(map_to_characters(exp))
-        msg = build_request(req_msg, length, rules, appendix, kmap)
+        msg = build_request_message(req_msg, length, rules, appendix, kmap)
         send_message(dev, msg)
         inp = input()
         assert inp == map_to_characters(exp)
