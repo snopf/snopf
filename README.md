@@ -86,7 +86,7 @@ The ATtiny85 does not include a secure enclave (or similar) and reading out the 
 Passwords typed in by Snopf can of course still be intercepted by a keylogger and might land in the RAM and swap memory of the host where malware might access them. Covering those attack vectors is likewise out of scope for Snopf.
  
 ## Password Creation Algorithm
-The password creation algorithm is explained in-depth [here](FIXME-LINK-TO-ALGO-PDF).
+The password creation algorithm is explained in-depth [here](../readme/password_algo.pdf).
 
 ## Hardware
 You can find a KiCad project for Snopf in the `hardware` subfolder and also a PDF of the current schematic [here](https://github.com/Snopf/Snopf/blob/master/readme/schematic.pdf). The KiCad project also includes a PCB layout for a SMD version.
