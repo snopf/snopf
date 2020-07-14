@@ -1,6 +1,6 @@
 # Snopf USB password token
 
-> Info: The password creation algorithm for Snopf has been fundamentally changed since 6b1df42b0c21d2e936d6018c70f1937114251a39. The new firmware and the new tools and account table files aren't compatible with the former version. The command line tool has been deprecated. Snopf also switched from using a 128 bit secret to using a 256 bit secret on the device. For upgrading the firmware you can use the firmware updater from the bootloader repository [here.](https://github.com/Snopf/Snopf_bootloader). For installation and configuration follow this readme.
+> Info: The password creation algorithm for Snopf has been fundamentally changed since 6b1df42b0c21d2e936d6018c70f1937114251a39. The new firmware and the new tools and account table files aren't compatible with the former version. The command line tool has been deprecated. Snopf also switched from using a 128 bit secret to using a 256 bit secret on the device. For upgrading the firmware you can use the firmware updater from the bootloader repository [here](https://github.com/Snopf/Snopf_bootloader). For installation and configuration follow this readme.
 
 ## What is Snopf?
 
