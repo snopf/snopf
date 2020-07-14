@@ -59,15 +59,16 @@ class SetSecretWizard(QWizard):
                 self.reject()
                 return
             
-            self.dev = usb_comm.get_standard_device()
+            dev = usb_comm.get_standard_device()
             msg = usb_comm.build_new_secret_message(mnemonic.to_entropy(self.mnemonic))
-            usb_comm.send_message(self.dev, msg)
+            usb_comm.send_message(dev, msg)
         
         elif (_id) == 3:
             logger.info('Starting challenge response')
             rq = os.urandom(16)
             msg = usb_comm.build_request_message(rq, 42, 0, [], pg.keymaps['all'])
-            usb_comm.send_message(self.dev, msg)
+            dev = usb_comm.get_standard_device()
+            usb_comm.send_message(dev, msg)
             expected = pg.get_mapped_password(
                 mnemonic.to_entropy(self.mnemonic), rq, 42, 0, pg.keymaps['all'])
             self.ui.expectedPasswordLabel.setText(pg.map_to_characters(expected))
