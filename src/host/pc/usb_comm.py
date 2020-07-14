@@ -51,10 +51,11 @@ def send_message(dev, msg):
     '''Send the raw byte message to the device dev'''
     if use_hidapi:
         if windows:
-            # We have to submit the report ID (0) when running windows
+            # We always have to send the exact same message size as defined in
+            # the USB HID descriptor when using the Windows HID driver API
+            msg += b'\x00' * (MAX_USB_MSG_LEN + 1 - len(msg))
+            # And we have to submit the report ID (0) when running windows
             msg = b'\x00' + msg
-            # And we always have to send the exact same length of messages
-            msg += b'\x00' * (MAX_USB_MSG_LEN - len(msg))
         dev.send_feature_report(msg)
         dev.close()
         return
