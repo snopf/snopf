@@ -37,7 +37,6 @@ class SnopfManager(QMainWindow):
 
 # TODO Add last date changed entry (+ what was changed?)
 # TODO change keyboard layout on device tool
-# TODO read keyboard data (delay + keyboard)
 # TODO test cases with mockup
 # TODO undo / redo
 # TODO make backups of loaded account tables
