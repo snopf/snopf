@@ -4,7 +4,7 @@
 
 ## What is Snopf?
 
-![Snopf device](readme/Snopf_header.jpg)
+![Snopf device](readme/snopf_header.jpg)
 
 Snopf is a very simple, yet effective and easy to use USB password tool. The Snopf USB device creates a unique and strong password for every service from the same 256 bit secret which never leaves the token.
 
