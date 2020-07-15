@@ -165,6 +165,7 @@ The output will be created in `src/host/dist`.
 
 ### Building Snopf QT Binaries for Windows
 You can build an executable for Windows using the same Makefile as for Linux. You will have to have [GNU make for Windows](http://gnuwin32.sourceforge.net/packages/make.htm) installed. All scripts are written for PowerShell so you have to run Make from PowerShell.
+PyInstaller will look for an [UPX](https://upx.github.io/) installation at `3rdparty/upx/`. You can create the binaries with or without using UPX compression.
 
 ### Browser extension
 The firefox extension is located at `src/host/browser_extension` and can be packed into a zip file suitable for the browser by simply running `make` there.
@@ -191,8 +192,6 @@ An Android App is in development for the new Snopf algorithm.
 <!-- 
 The Android App is located at `src/host/android` as an project for `androidstudio` and can be build and applied to an Android phone using the same.
  -->
-
-
 
 ## Disclaimer
 There is no warranty for data security and integrity or security issues of any kind. Care has been taken to make this a device that increases your security, however security bugs are possible.
