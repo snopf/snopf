@@ -55,7 +55,7 @@ class SnopfWebsocketServer(QWebSocketServer):
         logger.info('current list of websockets: %s' % str(self.connections))
         websocket.textMessageReceived.connect(lambda msg: self.textMessageReceived(websocket, msg))
         websocket.disconnected.connect(lambda: self.disconnected(websocket))
-        websocket.error.connect(lambda: self.connError(websocket))
+        websocket.error.connect(lambda error: self.connError(websocket, error))
         
     def processAcceptError(self, socketError):
         logger.error('Websocket Accept Error %d' % socketError)
@@ -75,6 +75,9 @@ class SnopfWebsocketServer(QWebSocketServer):
         logger.info('Current list of websockets: %s' % str(self.connections))
         
     def connError(self, websocket, socketError):
+        if (socketError == QAbstractSocket.RemoteHostClosedError):
+            # Ignore connection closing
+            return
         logger.error('ws error %d' % socketError)
         err = websocket.errorString()
         logger.error(err)
