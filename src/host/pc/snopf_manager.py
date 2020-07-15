@@ -403,6 +403,9 @@ class SnopfManager(QMainWindow):
         self.initNewAccountTable()
         self.fileName = None
         self.dataChanged = False
+        self.selectedService = None
+        self.selectedAccount = None
+        self.selectedEntry = None
         
     def getPassphrase(self, title=None, text=None):
         '''Get a master passphrase from user input'''
