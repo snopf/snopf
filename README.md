@@ -22,7 +22,7 @@ Instructions on how to build your own are found in the section *Hardware* and *B
 * You don't have to remember any passwords anymore (except preferably a master PIN for Snopf)
 * Every password is unique and as strong as the accessed service allows
 * The actual password creation is only happening on the USB device
-* It is possible to restore all passwords from a 24 word mnemonic representing the 256 bit secret
+* It is (under certain restrictions) possible to restore all passwords from a 24 word mnemonic representing the 256 bit secret
 * It's more secure than a common pure software based password manager because the password creation is physically detached from the computer
 * As Snopf emulates a regular keyboard, no passwords are stored in the clipboard
 
@@ -33,12 +33,20 @@ Snopf is an improvement over these managers because an attacker can't access you
 ![conventional_vs_Snopf](readme/conventional_vs_snopf.png)
 
 ## Using Snopf
-<!-- TODO show detailed 'how to use' -->
-### Snopf QT
-Snopf-QT is the GUI tool to manage the account table for Snopf and to interact with the USB device.
+A default request process for a password is pictured below, using the Snopf browser extension:
+
+![request_process](readme/request_process.png)
+
+To use Snopf two tools are currently available (an additional Android App is being developed), the *Snopf Manager* and a browser extension.
+
+The Snopf Manager needs to be running on a computer when using Snopf. Beside managing the account table for snopf (see below) it also runs a background server for the browser extension. Whenever a password request is made in the browser, it is sent to the server which in turn talks to the USB device. The Snopf Manager minimizes to tray and runs silently in the background if you are not currently editing the account table. You can also create new entries in the account table from the browser extension.
+
+![snopf manager screenshot](readme/screenshot_manager.png)
+
+![snopf tool overview](readme/snopf_tools.png)
 
 ### Account table
-With Snopf-QT you can create new entries, delete entries and change entries in the account table. A Snopf account table is a simple json with entries for every unique (service, account) combination. Each entry has six fields:
+With Snopf Manager you can create new entries, delete entries and change entries in the account table. A Snopf account table is a simple json with entries for every unique (service, account) combination. Each entry has six fields:
 
 1. `Service` = Hostname or service name for the login, for example the email service `examplemail.com`
 2. `Account` = Your account at this service, for example the email address for the email service `my_mail_address@examplemail.com`
@@ -47,19 +55,13 @@ With Snopf-QT you can create new entries, delete entries and change entries in t
 5. `Rules` = Rules for password creation, for example 'The password must include a lowercase character'
 6. `Keymap` = A keymap which will be used for the password creation which allows to include and exclude certain characters
 
-The account table file is AES encrypted on the hard disk using the same master password (not the master secret on the USB device!) that is used whenever a password request is submitted.
+The account table file is AES encrypted on the hard disk using the same master password (not to be confused with the secret on the USB device!) that is used whenever a password request is submitted.
 
-#### Change secret
-You can change the secret on the Snopf device using Snopf-QT.
-<!-- TODO show detailed 'how to use' -->
+![host_data_to_snopf](readme/host_data_to_snopf.png)
 
-### Browser plugins
 
-An everyday usecase of Snopf are user logins into web sites where you use the Snopf browser plugin. The general process of a password request is outlined in the picture below.
-
-![request_process](readme/request_process.png)
-
-The browser plugin can access the same account table as the Snopf_manager so you can fill out the account field by selecting known accounts from the table. With the browser extension you can make password requests and you can select to store newly typed in service + account combinations in the account table, but you can't remove existing accounts or change their settings.
+#### Setting the secret
+You can change the secret on the Snopf device using Snopf Manager.
 
 ## Restoring passwords
 
@@ -151,19 +153,19 @@ in the avr source directory `src/avr`. You'll probably have to alter the `Makefi
 
 There also exists a bootloader written for this project, you can find it here [Snopf bootloader](https://github.com/Snopf/Snopf_bootloader) so that you can update the code on the device via USB. The bootloader is not necessary but it comes in handy for updating the firmware.
 
-### Running the Snopf QT Python code
+### Running the Snopf Manager Python code
 After activating the Python virtual enviroment you can run the QT app as a Python script by running
 ```
 python snopf_manager.py
 ```
 in `src/host/pc`.
 
-### Building Snopf QT Binaries for Linux
+### Building Snopf Manager Binaries for Linux
 You can build a stand-alone binary for Snopf using PyInstaller. Just run `make` in `src/host/pc`.
 It is advised to run `make` in the Python virtual enviroment to ensure that all needed packages are installed using the correct version.
 The output will be created in `src/host/dist`.
 
-### Building Snopf QT Binaries for Windows
+### Building Snopf Manager Binaries for Windows
 You can build an executable for Windows using the same Makefile as for Linux. You will have to have [GNU make for Windows](http://gnuwin32.sourceforge.net/packages/make.htm) installed. All scripts are written for PowerShell so you have to run Make from PowerShell.
 PyInstaller will look for an [UPX](https://upx.github.io/) installation at `3rdparty/upx/`. You can create the binaries with or without using UPX compression.
 
