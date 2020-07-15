@@ -24,7 +24,7 @@ class AccountTableWidget(QTreeWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.itemActivated.connect(self.selectFirstChild)
+        self.itemClicked.connect(self.selectFirstChild)
         
     def initNewAccountTable(self, accountTable):
         '''Init widget with new account table'''
