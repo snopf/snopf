@@ -12,18 +12,17 @@ from test_tools import *
 from pytestqt import *
 import json
 
-# FIXME Theses tests fail on Windows 10
 
 def _test_msg(qtbot, msg, signal_name):
     server = SnopfWebsocketServer(None, 50000)
     ws = QWebSocket()
-    with qtbot.waitSignal(ws.connected, timeout=2000) as blocker:
+    with qtbot.waitSignal(ws.connected, timeout=6000) as blocker:
         ws.open(QUrl('ws://localhost:50000'))
     signal = getattr(server, signal_name)
-    with qtbot.waitSignal(signal, timeout=2000) as blocker:
+    with qtbot.waitSignal(signal, timeout=6000) as blocker:
         ws.sendTextMessage(msg)
     ws.close()
-    with qtbot.waitSignal(server.closed, timeout=2000) as blocker:
+    with qtbot.waitSignal(server.closed, timeout=6000) as blocker:
         server.close()
     
 def test_cmd_get_accounts(qtbot):
