@@ -4,5 +4,8 @@
 import git
 
 def get_commit_hash():
-    repo = git.Repo(search_parent_directories=True)
-    return repo.head.object.hexsha
+    try:
+        repo = git.Repo(search_parent_directories=True)
+        return repo.head.object.hexsha
+    except git.exc.InvalidGitRepositoryError:
+        return 'no valid git hash'
