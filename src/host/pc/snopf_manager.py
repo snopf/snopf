@@ -55,6 +55,20 @@ class SnopfManager(QMainWindow):
         
         logger.info('Application started')
         
+        # Setting up directories for app
+        self.user_data_dir = appdirs.user_data_dir('snopf-manager', 'snopf')
+        if not os.path.exists(self.user_data_dir):
+            logger.info('Creating user data dir: %s' % str(self.user_data_dir))
+            os.makedirs(self.user_data_dir)
+            
+        self.user_config_dir = configPath
+        if not self.user_config_dir:
+            self.user_config_dir = appdirs.user_config_dir('snopf-manager', 'snopf')
+        if not os.path.exists(self.user_config_dir):
+            logger.info('Creating user config dir: %s' % str(self.user_config_dir))
+            os.makedirs(self.user_config_dir)
+        logger.info('Working with user config dir: %s' % str(self.user_config_dir))
+            
         # Initialize tray icon
         self.tray = QSystemTrayIcon()
         self.tray.setIcon(QIcon(':/icon/icon/icon.svg'))
@@ -138,7 +152,7 @@ class SnopfManager(QMainWindow):
         self.ui.keymapEdit.editingFinished.connect(self.updateSelectedEntry)
         
         # Load snopf options file
-        self.loadOptions(configPath)
+        self.loadOptions()
         
         # load last loaded file
         if self.options['last-filename']:
@@ -160,13 +174,8 @@ class SnopfManager(QMainWindow):
         logger.error('Exception', exc_info=(exctype, value, traceback))
         QMessageBox.critical(self, 'Uncaught Exception', str(exctype) + str(value), QMessageBox.Ok)
                 
-    def loadOptions(self, configPath):
-        if not configPath:
-            configPath = appdirs.user_data_dir('snopf-manager', 'snopf')
-        if not os.path.exists(configPath):
-            os.makedirs(configPath)
-        logger.info('Config path: %s' % str(configPath))
-        self.options_file_path = os.path.join(configPath, 'snopf_options.json')
+    def loadOptions(self):
+        self.options_file_path = os.path.join(self.user_config_dir, 'snopf_options.json')
         if not Path(self.options_file_path).exists():
             logger.info('snopf_options not found, creating new file')
             with open(self.options_file_path, 'w') as f:
@@ -488,19 +497,17 @@ class SnopfManager(QMainWindow):
         
     def saveAccountTableAs(self):
         '''Save under new name'''
+        if self.fileName:
+            path = os.path.dirname(self.fileName)
+        else:
+            path = self.user_data_dir
         fileName,_ = QFileDialog.getSaveFileName(self, 'Save Account Table',
-                                                 str(Path.home()), 'Account table (*.snopf)')
+                                                 self.user_data_dir, 'Account table (*.snopf)')
         if not fileName:
             return
         self.fileName = fileName
         self.saveAccountTable()
         
-    def getPathFromCurrentFile(self):
-        '''Get the path for the currently open file'''
-        if not self.fileName:
-            return str(Path.home())
-        return os.path.dirname(os.path.abspath(self.fileName))
-            
     def requestPassword(self, service=None, account=None, makeNewEntry=False):
         '''
         Make a password request using the given service and account combination.
