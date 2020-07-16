@@ -397,8 +397,14 @@ class SnopfManager(QMainWindow):
         self.checkCurrentDataSave()
         # Set a master key for the new account table
         passphrase_one = self.getPassphrase()
-        if not passphrase_one:
+        if passphrase_one == None:
+            # dialog cancelled
             return
+        if passphrase_one == b'':
+            # empty passphrase chosen
+            msg = 'Do you really want to create a new account table without a passphrase?'
+            if not self.askUser('Empty Passphrase', msg):
+                return
         passphrase_two = self.getPassphrase('Repeat Passphrase')
         if not passphrase_one == passphrase_two:
             QMessageBox.critical(self, 'Wrong Passphrase', 'Passphrases do not match',
