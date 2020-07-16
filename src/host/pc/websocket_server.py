@@ -13,8 +13,8 @@ from PySide2.QtNetwork import *
 from PySide2.QtWebSockets import *
 import json
 
-import snopf_logging
-logger = snopf_logging.get_logger('websocket-server')
+import logging
+logger = logging.getLogger('websocket-server')
 
 class SnopfWebsocketError(Exception):
     pass

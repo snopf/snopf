@@ -156,7 +156,7 @@ There also exists a bootloader written for this project, you can find it here [S
 ### Running the Snopf Manager Python code
 After activating the Python virtual enviroment you can run the QT app as a Python script by running
 ```
-python snopf_manager.py
+python snopf.py
 ```
 in `src/host/pc`.
 

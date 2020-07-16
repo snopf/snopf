@@ -11,7 +11,7 @@ dist_path = ../dist/pc/
 work_path = ../build
 icon_path = ../../../art/icon/snopf.ico
 
-PYINSTALL_CMD = pyinstaller snopf_manager.py --noconsole  --distpath=$(dist_path) --workpath=$(work_path)/snopf_manager --specpath=$(work_path) --paths=. --name=snopf --noconfirm --icon=$(icon_path) --onefile $(pyinstall_upxdir)
+PYINSTALL_CMD = pyinstaller snopf.py --noconsole  --distpath=$(dist_path) --workpath=$(work_path)/snopf_manager --specpath=$(work_path) --paths=. --name=snopf --noconfirm --icon=$(icon_path) --onefile $(pyinstall_upxdir)
 
 all:	test $(TARGET)
 

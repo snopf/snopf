@@ -10,8 +10,8 @@ Qt Widget for accessing the account table
 from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 
-import snopf_logging
-logger = snopf_logging.get_logger('account-table-widget')
+import logging
+logger = logging.getLogger('account-table-widget')
 
 class AccountTableWidget(QTreeWidget):
         

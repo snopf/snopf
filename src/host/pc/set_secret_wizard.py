@@ -16,14 +16,14 @@ import mnemonic
 import requests
 import usb_comm
 import password_generator as pg
-import snopf_logging
+import logging
 
 from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 
 import os
 
-logger = snopf_logging.get_logger('set-secret-wizard')
+logger = logging.getLogger('set-secret-wizard')
 
 class SetSecretWizard(QWizard):
     

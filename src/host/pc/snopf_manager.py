@@ -17,7 +17,7 @@ from set_secret_wizard import SetSecretWizard
 import password_generator as pg
 import account_table as at
 from websocket_server import SnopfWebsocketServer
-import snopf_logging
+import logging
 
 import sys
 from PySide2.QtCore import *
@@ -30,8 +30,9 @@ import copy
 from pathlib import Path
 import resources_rc
 from usb.core import USBError
+import appdirs
 
-logger = snopf_logging.get_logger('main')
+logger = logging.getLogger('main')
 
 class SnopfManager(QMainWindow):
 
@@ -44,7 +45,7 @@ class SnopfManager(QMainWindow):
 # TODO secure websocket connection (whitelisting)
 # TODO option for allowing/disallowing new entries from websockets
     
-    def __init__(self):
+    def __init__(self, configPath=None):
         super().__init__()
         self.ui = Ui_SnopfManager()
         self.ui.setupUi(self)
@@ -137,7 +138,7 @@ class SnopfManager(QMainWindow):
         self.ui.keymapEdit.editingFinished.connect(self.updateSelectedEntry)
         
         # Load snopf options file
-        self.loadOptions()
+        self.loadOptions(configPath)
         
         # load last loaded file
         if self.options['last-filename']:
@@ -159,12 +160,18 @@ class SnopfManager(QMainWindow):
         logger.error('Exception', exc_info=(exctype, value, traceback))
         QMessageBox.critical(self, 'Uncaught Exception', str(exctype) + str(value), QMessageBox.Ok)
                 
-    def loadOptions(self):
-        if not Path('snopf_options.json').exists():
+    def loadOptions(self, configPath):
+        if not configPath:
+            configPath = appdirs.user_data_dir('snopf-manager', 'snopf')
+        if not os.path.exists(configPath):
+            os.makedirs(configPath)
+        logger.info('Config path: %s' % str(configPath))
+        self.options_file_path = os.path.join(configPath, 'snopf_options.json')
+        if not Path(self.options_file_path).exists():
             logger.info('snopf_options not found, creating new file')
-            with open('snopf_options.json', 'w') as f:
+            with open(self.options_file_path, 'w') as f:
                 json.dump({}, f)
-        with open('snopf_options.json', 'r') as f:
+        with open(self.options_file_path, 'r') as f:
             logger.info('loading snopf options')
             self.options = json.load(f)
         
@@ -573,7 +580,7 @@ class SnopfManager(QMainWindow):
         '''Save current app options to persistent json'''
         logger.info('Saving options')
         self.options['last-filename'] = self.fileName
-        with open('snopf_options.json', 'w') as f:
+        with open(self.options_file_path, 'w') as f:
             json.dump(self.options, f)
             
     def trayIconActivated(self, reason):
@@ -596,9 +603,3 @@ class SnopfManager(QMainWindow):
         self.cleanup()
         logger.info('Exiting')
         sys.exit()
-        
-if __name__ == '__main__':
-    app = QApplication([])
-    w = SnopfManager()
-    w.show()
-    sys.exit(app.exec_())
