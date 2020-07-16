@@ -25,7 +25,7 @@ static volatile uint16_t usb_expected_bytes = 0;
 
 // The size of the USB message buffer is the maximum message (128 keycodes + 1 msg type byte)
 // Note that the actual size of the buffer union is much larger (342) bytes due to shared memory
-#define USB_BUFFER_SIZE 192
+#define USB_BUFFER_SIZE 129
 
 // Minimum message size is a keyboard change, one flag byte + one new keyboard delay byte
 #define USB_MIN_MSG_SIZE 2
