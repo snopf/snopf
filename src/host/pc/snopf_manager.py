@@ -445,8 +445,12 @@ class SnopfManager(QMainWindow):
         '''Open existing account table file'''
         self.checkCurrentDataSave()
         if not fileName:
+            if self.fileName:
+                path = os.path.dirname(self.fileName)
+            else:
+                path = self.user_data_dir        
             fileName,_ = QFileDialog.getOpenFileName(
-                self, 'Open Account Table', str(Path.home()), 'Account table (*.snopf)')
+                self, 'Open Account Table', path, 'Account table (*.snopf)')
         if not fileName:
             return
         passphrase = self.getPassphrase(text='Passphrase for file %s' % fileName)
