@@ -79,6 +79,11 @@ class Ui_SetSecretWizard(object):
 
         self.passwordEdit = QLineEdit(self.page4)
         self.passwordEdit.setObjectName(u"passwordEdit")
+        self.passwordEdit.setInputMethodHints(Qt.ImhNoAutoUppercase)
+        self.passwordEdit.setInputMask(u"")
+        self.passwordEdit.setText(u"")
+        self.passwordEdit.setFrame(True)
+        self.passwordEdit.setPlaceholderText(u"")
 
         self.gridLayout_3.addWidget(self.passwordEdit, 1, 0, 1, 1)
 
