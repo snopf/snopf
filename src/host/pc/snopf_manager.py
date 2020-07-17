@@ -17,8 +17,9 @@ from set_secret_wizard import SetSecretWizard
 import password_generator as pg
 import account_table as at
 from websocket_server import SnopfWebsocketServer
-import logging
+import keyboard_layouts
 
+import logging
 import sys
 from PySide2.QtCore import *
 from PySide2.QtWidgets import *
@@ -116,6 +117,7 @@ class SnopfManager(QMainWindow):
         self.ui.actionVersionInfo.triggered.connect(self.showVersionInfo)
         self.ui.actionSetSnopfSecret.triggered.connect(self.startSecretWizard)
         self.ui.actionSetKeyboardDelay.triggered.connect(self.setKeyboardDelay)
+        self.ui.actionSetKeyboardLayout.triggered.connect(self.setKeyboardLayout)
         
         # Account table
         self.ui.accountTableWidget.accountSelected.connect(self.accountSelected)
@@ -571,6 +573,32 @@ class SnopfManager(QMainWindow):
             QMessageBox.information(self, 'Setting Keyboard Delay',
                                     'Press the Button on the device to set the new delay.',
                                     QMessageBox.Ok)
+    
+    def setKeyboardLayout(self):
+        '''Set a new keyboard layout on a connected Snopf device'''
+        fileName,_ = QFileDialog.getOpenFileName(self, 'Open Keyboard Layout File',
+                                                 str(Path.home()), 'Json (*.json)')
+        if not fileName:
+            return
+        layout = json.load(open(fileName))
+        try:
+            keyboard_layouts.check_keyboard_layout(layout)
+        except ValueError as e:
+            logger.info('Invalid keyboard layout file. Reason: %s' % e)
+            QMessageBox.critical(self, 'Invalid Keyboard Layout File', str(e), QMessageBox.Ok)
+            return
+        bytesLayout = keyboard_layouts.to_bytes(layout)
+        if not usb_comm.is_device_available():
+            QMessageBox.critical(self, 'Device not found', 'The device is not plugged in.',
+                                 QMessageBox.Ok)
+            return
+        dev = usb_comm.get_standard_device()
+        msg = usb_comm.build_new_keyboard_keycodes_message(bytesLayout)
+        usb_comm.send_message(dev, msg)
+        QMessageBox.information(self, 'Setting Keyboard Layout',
+                                'Press the Button on the device for five seconds to set new keyboard layout.',
+                                QMessageBox.Ok)
+        logger.info('New Keyboard layout set')
     
     def askUser(self, title, question):
         '''Get yes / no answer from user'''

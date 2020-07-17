@@ -59,6 +59,8 @@ class Ui_SnopfManager(object):
         self.actionSaveAs.setObjectName(u"actionSaveAs")
         self.actionExit = QAction(SnopfManager)
         self.actionExit.setObjectName(u"actionExit")
+        self.actionSetKeyboardLayout = QAction(SnopfManager)
+        self.actionSetKeyboardLayout.setObjectName(u"actionSetKeyboardLayout")
         self.centralwidget = QWidget(SnopfManager)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout_6 = QGridLayout(self.centralwidget)
@@ -512,6 +514,7 @@ class Ui_SnopfManager(object):
         self.menuAbout.addAction(self.actionVersionInfo)
         self.menuTools.addAction(self.actionSetSnopfSecret)
         self.menuTools.addAction(self.actionSetKeyboardDelay)
+        self.menuTools.addAction(self.actionSetKeyboardLayout)
 
         self.retranslateUi(SnopfManager)
 
@@ -537,6 +540,7 @@ class Ui_SnopfManager(object):
         self.actionSetKeyboardDelay.setIconText(QCoreApplication.translate("SnopfManager", u"Set Keyboard Delay", None))
         self.actionSaveAs.setText(QCoreApplication.translate("SnopfManager", u"Sa&ve As", None))
         self.actionExit.setText(QCoreApplication.translate("SnopfManager", u"&Exit", None))
+        self.actionSetKeyboardLayout.setText(QCoreApplication.translate("SnopfManager", u"Set Keyboard Layout", None))
         self.label.setText(QCoreApplication.translate("SnopfManager", u"Service:", None))
         self.label_2.setText(QCoreApplication.translate("SnopfManager", u"Account:", None))
         self.requestPasswordButton.setText(QCoreApplication.translate("SnopfManager", u"Request Password", None))
