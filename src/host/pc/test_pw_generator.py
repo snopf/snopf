@@ -32,6 +32,41 @@ def test_passwords():
                 test['rules'], test['keymap'])
             assert mapped_pw == test['mapped_password']
             assert map_to_characters(mapped_pw) == test['password_string']
+            
+def test_bool_rules():
+    r = {'include_lowercase': False,
+         'include_uppercase': False,
+         'include_digit': False,
+         'include_special': False,
+         'no_repetitions': False,
+         'no_sequences': False}
+    rr = {key: val for key, val in r.items()}
+    rr['include_lowercase'] = True
+    assert bool_to_rules(rr) == PW_RULE_INCLUDE_LOWERCASE
+    assert rules_to_bool(PW_RULE_INCLUDE_LOWERCASE) == rr
+    rr = {key: val for key, val in r.items()}
+    rr['include_uppercase'] = True
+    assert bool_to_rules(rr) == PW_RULE_INCLUDE_UPPERCASE
+    assert rules_to_bool(PW_RULE_INCLUDE_UPPERCASE) == rr
+    rr = {key: val for key, val in r.items()}
+    rr['include_digit'] = True
+    assert bool_to_rules(rr) == PW_RULE_INCLUDE_DIGIT
+    assert rules_to_bool(PW_RULE_INCLUDE_DIGIT) == rr
+    rr = {key: val for key, val in r.items()}
+    rr['include_special'] = True
+    assert bool_to_rules(rr) == PW_RULE_INCLUDE_SPECIAL
+    assert rules_to_bool(PW_RULE_INCLUDE_SPECIAL) == rr
+    rr = {key: val for key, val in r.items()}
+    rr['no_repetitions'] = True
+    assert bool_to_rules(rr) == PW_RULE_NO_REP
+    assert rules_to_bool(PW_RULE_NO_REP) == rr
+    rr = {key: val for key, val in r.items()}
+    rr['no_sequences'] = True
+    assert bool_to_rules(rr) == PW_RULE_NO_SEQ
+    assert rules_to_bool(PW_RULE_NO_SEQ) == rr
+    
+    for i in range(64):     # We have 2^6 different rule combinations
+        assert bool_to_rules(rules_to_bool(i)) == i
                 
 def test_check_inclusion_rules_lowercase():
     pw = [KEY_TABLE.index('a')]

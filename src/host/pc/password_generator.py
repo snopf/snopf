@@ -46,6 +46,19 @@ password_rules = {
 
 rule_names = [key for key in password_rules.keys()]
 
+def rules_to_bool(rules):
+    '''Return dict with boolean entries for each rule for the given rules integer'''
+    return {rule_name: bool(rules & rule_num) for rule_name, rule_num in password_rules.items()}
+
+def bool_to_rules(rule_dict):
+    '''Return rules integer for given rules'''
+    rule = 0
+    for rule_name in password_rules.keys():
+        if rule_dict[rule_name]:
+            rule |= password_rules[rule_name]
+            
+    return rule
+
 # "hit enter rule" for completeness, unused in the python implementation
 PW_RULE_HIT_ENTER = 1 << 6
 

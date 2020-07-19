@@ -80,13 +80,49 @@ def open_account_table_file(f, passphrase):
     
     return data
 
-def create_entry():
+def new_account_table():
+    return []
+
+def create_entry(service, account):
     '''Create a new account table entry filled with default values'''
     entry = {}
+    entry['service'] = service
+    entry['account'] = account
     entry['password_length'] = pw.DEFAULT_PW_LENGTH
     entry['password_iteration'] = 0
     entry['comment'] = ''
     entry['keymap'] = pw.keymaps['all']
-    entry['rules'] = 0
+    entry['include_lowercase'] = False
+    entry['include_uppercase'] = False
+    entry['include_digit'] = False
+    entry['include_special'] = False
+    entry['no_repetitions'] = False
+    entry['no_sequences'] = False
     entry['appendix'] = []
     return entry
+
+def check_entry_exists(account_table, service, account):
+    '''Return True if an entry with the given service, account already exists'''
+    for entry in account_table:
+        if entry['service'] == service and entry['account'] == account:
+            return True
+    return False
+
+def get_entry(account_table, service, account):
+    '''Return entry for given service and account'''
+    for entry in account_table:
+        if entry['service'] == service and entry['account'] == account:
+            return entry
+    raise KeyError('No Entry found')
+
+def sort_account_table(account_table):
+    '''Sort by service and account'''
+    return sorted(account_table, key=lambda entry: (entry['service'], entry['account']))
+
+def get_accounts_for_services(account_table):
+    '''Return a dictionary with a list of accounts for every existing service'''
+    data = {}
+    for row in account_table:
+        data[row['service']] = data.get(row['service'], [])
+        data[row['service']].append(row['account'])
+    return data

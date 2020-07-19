@@ -15,8 +15,8 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
 
-from account_table_widget import AccountTableWidget
 from keymap_editing import KeymapLineEdit
+from keymap_editing import AppendixEdit
 
 import resources_rc
 
@@ -68,17 +68,16 @@ class Ui_SnopfManager(object):
         self.splitter = QSplitter(self.centralwidget)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Horizontal)
-        self.accountTableWidget = AccountTableWidget(self.splitter)
-        __qtreewidgetitem = QTreeWidgetItem()
-        __qtreewidgetitem.setText(1, u"2");
-        __qtreewidgetitem.setText(0, u"1");
-        self.accountTableWidget.setHeaderItem(__qtreewidgetitem)
-        self.accountTableWidget.setObjectName(u"accountTableWidget")
-        self.accountTableWidget.setSortingEnabled(True)
-        self.accountTableWidget.setHeaderHidden(False)
-        self.accountTableWidget.setColumnCount(2)
-        self.splitter.addWidget(self.accountTableWidget)
-        self.accountTableWidget.header().setVisible(True)
+        self.accountTableView = QTableView(self.splitter)
+        self.accountTableView.setObjectName(u"accountTableView")
+        self.accountTableView.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.accountTableView.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.accountTableView.setShowGrid(False)
+        self.accountTableView.setSortingEnabled(True)
+        self.splitter.addWidget(self.accountTableView)
+        self.accountTableView.horizontalHeader().setDefaultSectionSize(150)
+        self.accountTableView.horizontalHeader().setStretchLastSection(True)
+        self.accountTableView.verticalHeader().setVisible(False)
         self.layoutWidget = QWidget(self.splitter)
         self.layoutWidget.setObjectName(u"layoutWidget")
         self.verticalLayout_5 = QVBoxLayout(self.layoutWidget)
@@ -153,11 +152,6 @@ class Ui_SnopfManager(object):
         self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout_6.addItem(self.horizontalSpacer_6)
-
-        self.commitChangesButton = QPushButton(self.frame_2)
-        self.commitChangesButton.setObjectName(u"commitChangesButton")
-
-        self.horizontalLayout_6.addWidget(self.commitChangesButton)
 
         self.deleteEntryButton = QPushButton(self.frame_2)
         self.deleteEntryButton.setObjectName(u"deleteEntryButton")
@@ -321,10 +315,10 @@ class Ui_SnopfManager(object):
 
         self.verticalLayout.addWidget(self.includeUppercaseCB)
 
-        self.includeNumericalCB = QCheckBox(self.rulesTab)
-        self.includeNumericalCB.setObjectName(u"includeNumericalCB")
+        self.includeDigitCB = QCheckBox(self.rulesTab)
+        self.includeDigitCB.setObjectName(u"includeDigitCB")
 
-        self.verticalLayout.addWidget(self.includeNumericalCB)
+        self.verticalLayout.addWidget(self.includeDigitCB)
 
         self.includeSpecialCB = QCheckBox(self.rulesTab)
         self.includeSpecialCB.setObjectName(u"includeSpecialCB")
@@ -362,11 +356,11 @@ class Ui_SnopfManager(object):
 
         self.horizontalLayout.addWidget(self.label_10)
 
-        self.pwAppendixEdit = QLineEdit(self.rulesTab)
-        self.pwAppendixEdit.setObjectName(u"pwAppendixEdit")
-        self.pwAppendixEdit.setMaxLength(3)
+        self.appendixEdit = AppendixEdit(self.rulesTab)
+        self.appendixEdit.setObjectName(u"appendixEdit")
+        self.appendixEdit.setMaxLength(3)
 
-        self.horizontalLayout.addWidget(self.pwAppendixEdit)
+        self.horizontalLayout.addWidget(self.appendixEdit)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -396,7 +390,9 @@ class Ui_SnopfManager(object):
 
         self.keymapEdit = KeymapLineEdit(self.keymapTab)
         self.keymapEdit.setObjectName(u"keymapEdit")
+        self.keymapEdit.setInputMethodHints(Qt.ImhNoAutoUppercase)
         self.keymapEdit.setMaxLength(64)
+        self.keymapEdit.setPlaceholderText(u"")
 
         self.verticalLayout_4.addWidget(self.keymapEdit)
 
@@ -518,7 +514,7 @@ class Ui_SnopfManager(object):
 
         self.retranslateUi(SnopfManager)
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(SnopfManager)
@@ -540,11 +536,10 @@ class Ui_SnopfManager(object):
         self.actionSetKeyboardDelay.setIconText(QCoreApplication.translate("SnopfManager", u"Set Keyboard Delay", None))
         self.actionSaveAs.setText(QCoreApplication.translate("SnopfManager", u"Sa&ve As", None))
         self.actionExit.setText(QCoreApplication.translate("SnopfManager", u"&Exit", None))
-        self.actionSetKeyboardLayout.setText(QCoreApplication.translate("SnopfManager", u"Set Keyboard Layout", None))
+        self.actionSetKeyboardLayout.setText(QCoreApplication.translate("SnopfManager", u"Set Keyboard &Layout", None))
         self.label.setText(QCoreApplication.translate("SnopfManager", u"Service:", None))
         self.label_2.setText(QCoreApplication.translate("SnopfManager", u"Account:", None))
         self.requestPasswordButton.setText(QCoreApplication.translate("SnopfManager", u"Request Password", None))
-        self.commitChangesButton.setText(QCoreApplication.translate("SnopfManager", u"Commit Changes", None))
         self.deleteEntryButton.setText(QCoreApplication.translate("SnopfManager", u"Delete Entry", None))
         self.label_4.setText(QCoreApplication.translate("SnopfManager", u"Password Length:", None))
         self.label_3.setText(QCoreApplication.translate("SnopfManager", u"Password Iteration:", None))
@@ -553,7 +548,7 @@ class Ui_SnopfManager(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.generalTab), QCoreApplication.translate("SnopfManager", u"General", None))
         self.includeLowercaseCB.setText(QCoreApplication.translate("SnopfManager", u"Include lowercase", None))
         self.includeUppercaseCB.setText(QCoreApplication.translate("SnopfManager", u"Include uppercase", None))
-        self.includeNumericalCB.setText(QCoreApplication.translate("SnopfManager", u"Include numerical", None))
+        self.includeDigitCB.setText(QCoreApplication.translate("SnopfManager", u"Include numerical", None))
         self.includeSpecialCB.setText(QCoreApplication.translate("SnopfManager", u"Include special character", None))
         self.avoidRepCB.setText(QCoreApplication.translate("SnopfManager", u"Avoid repeated characters", None))
         self.avoidSeqCB.setText(QCoreApplication.translate("SnopfManager", u"Avoid sequences", None))

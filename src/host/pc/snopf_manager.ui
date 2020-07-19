@@ -30,29 +30,28 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="AccountTableWidget" name="accountTableWidget">
+      <widget class="QTableView" name="accountTableView">
+       <property name="selectionMode">
+        <enum>QAbstractItemView::SingleSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="showGrid">
+        <bool>false</bool>
+       </property>
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
-       <property name="headerHidden">
-        <bool>false</bool>
-       </property>
-       <property name="columnCount">
-        <number>2</number>
-       </property>
-       <attribute name="headerVisible">
+       <attribute name="horizontalHeaderDefaultSectionSize">
+        <number>150</number>
+       </attribute>
+       <attribute name="horizontalHeaderStretchLastSection">
         <bool>true</bool>
        </attribute>
-       <column>
-        <property name="text">
-         <string notr="true">1</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string notr="true">2</string>
-        </property>
-       </column>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
       </widget>
       <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -185,13 +184,6 @@
                 </spacer>
                </item>
                <item>
-                <widget class="QPushButton" name="commitChangesButton">
-                 <property name="text">
-                  <string>Commit Changes</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
                 <widget class="QPushButton" name="deleteEntryButton">
                  <property name="text">
                   <string>Delete Entry</string>
@@ -208,7 +200,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="generalTab">
            <attribute name="title">
@@ -478,7 +470,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="includeNumericalCB">
+               <widget class="QCheckBox" name="includeDigitCB">
                 <property name="text">
                  <string>Include numerical</string>
                 </property>
@@ -529,7 +521,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="pwAppendixEdit">
+                 <widget class="AppendixEdit" name="appendixEdit">
                   <property name="maxLength">
                    <number>3</number>
                   </property>
@@ -583,11 +575,17 @@
               </item>
               <item>
                <widget class="KeymapLineEdit" name="keymapEdit">
+                <property name="inputMethodHints">
+                 <set>Qt::ImhNoAutoUppercase</set>
+                </property>
                 <property name="text">
                  <string>abcdefghijklmnopqrABCDEFGHIJKLMNOPQR0123456789-@!?$*+=&amp;#[]().:&gt;&lt;</string>
                 </property>
                 <property name="maxLength">
                  <number>64</number>
+                </property>
+                <property name="placeholderText">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
@@ -829,18 +827,18 @@
   </action>
   <action name="actionSetKeyboardLayout">
    <property name="text">
-    <string>Set Keyboard Layout</string>
+    <string>Set Keyboard &amp;Layout</string>
    </property>
   </action>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>AccountTableWidget</class>
-   <extends>QTreeWidget</extends>
-   <header>account_table_widget</header>
+   <class>KeymapLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>keymap_editing</header>
   </customwidget>
   <customwidget>
-   <class>KeymapLineEdit</class>
+   <class>AppendixEdit</class>
    <extends>QLineEdit</extends>
    <header>keymap_editing</header>
   </customwidget>

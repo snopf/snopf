@@ -63,12 +63,13 @@ def send_message(dev, msg):
 
 def build_request_message(request, length, rules, appendix, keymap):
     '''Build a password request message'''
+    appendix = b''.join([int.to_bytes(i, 1, 'little') for i in appendix])
     while len(appendix) < 3:
-        appendix.append(0xff)
+        appendix += b'\xff'
     return (MSG_FLAG_REQUEST
             + request + int.to_bytes(length, 1, 'little')
             + int.to_bytes(rules, 1, 'little')
-            + b''.join([int.to_bytes(i, 1, 'little') for i in appendix])
+            + appendix
             + b''.join([int.to_bytes(i, 1, 'little') for i in keymap]))
 
 def build_set_keyboard_delay_message(delay):

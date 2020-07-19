@@ -18,6 +18,7 @@ import password_generator as pg
 import account_table as at
 from websocket_server import SnopfWebsocketServer
 import keyboard_layouts
+from account_table_model import AccountTableModel, AccountTableViewProxyModel
 
 import logging
 import sys
@@ -81,22 +82,20 @@ class SnopfManager(QMainWindow):
         self.tray.activated.connect(self.trayIconActivated)
         self.tray.show()
         
-        # Filename of open account table
-        self.__fileName = None
-        
-        # Currently selected data from account table
-        self.selectedEntry = None
-        self.selectedAccount = None
-        self.selectedService = None
-        
-        self.commitHash = get_commit_hash()
-        logger.info('Git hash: %s' % self.commitHash)
-        
         # Master passphrase for current account table
         self.masterPassphrase = None
         
-        # Flag if account table has been changed
-        self.dataChanged = False
+        # Filename of open account table
+        self.__fileName = None
+        
+        # Model for Account Table data
+        self.atModel = None
+        # Mapper for widgets <> model
+        self.atMapper = None
+        
+        # Software version
+        self.commitHash = get_commit_hash()
+        logger.info('Git hash: %s' % self.commitHash)
         
         # Connect menu actions
         self.ui.actionNew.triggered.connect(self.newAccountTable)
@@ -120,12 +119,10 @@ class SnopfManager(QMainWindow):
         self.ui.actionSetKeyboardLayout.triggered.connect(self.setKeyboardLayout)
         
         # Account table
-        self.ui.accountTableWidget.accountSelected.connect(self.accountSelected)
-        self.ui.commitChangesButton.clicked.connect(self.commitChanges)
         self.ui.deleteEntryButton.clicked.connect(self.deleteEntry)
         self.ui.requestPasswordButton.clicked.connect(lambda x: self.requestPassword())
-        self.lastTabIndex = 0
-        self.ui.tabWidget.currentChanged.connect(self.tabChanged)
+        self.ui.accountTableView.activated.connect(self.entrySelected)
+        self.ui.entropyEdit.textChanged.connect(self.decorateEntropy)
         
         # Keymap editing
         self.ui.keymapEdit.keymapChanged.connect(
@@ -145,38 +142,31 @@ class SnopfManager(QMainWindow):
         self.ui.lengthSpinner.setMaximum(pg.MAX_PW_LENGTH)
         self.ui.lengthSpinner.setValue(pg.DEFAULT_PW_LENGTH)
         
-        self.ui.lengthSpinner.valueChanged.connect(self.updateSelectedEntry)
-        self.ui.includeLowercaseCB.stateChanged.connect(self.updateSelectedEntry)
-        self.ui.includeUppercaseCB.stateChanged.connect(self.updateSelectedEntry)
-        self.ui.includeNumericalCB.stateChanged.connect(self.updateSelectedEntry)
-        self.ui.includeSpecialCB.stateChanged.connect(self.updateSelectedEntry)
-        self.ui.pwAppendixEdit.editingFinished.connect(self.updateSelectedEntry)
-        self.ui.keymapEdit.editingFinished.connect(self.updateSelectedEntry)
-        
         # Load snopf options file
         self.loadOptions()
         
-        # load last loaded file
+        # Load last loaded file if available
         if self.options['last-filename']:
             try:
                 self.openAccountTable(self.options['last-filename'])
             except FileNotFoundError:
                 logger.warning('Last file % s not found, skipping auto load' % lastFileName)
         
-        # Websocket server
+        # Init websocket server
         self.websocketServer = SnopfWebsocketServer(self, self.options['websocket-port'])
         self.websocketServer.deviceAvailableRequest.connect(
             lambda ws: self.websocketServer.sendDeviceAvailable(ws, usb_comm.is_device_available()))
         self.websocketServer.accountsRequest.connect(
             lambda ws: self.websocketServer.sendAccountsList(ws, self.getAccounts()))
         self.websocketServer.passwordRequest.connect(self.requestPassword)
-    
+        
     def logException(self, exctype, value, traceback):
         '''Log uncaught execptions and show an info message'''
         logger.error('Exception', exc_info=(exctype, value, traceback))
         QMessageBox.critical(self, 'Uncaught Exception', str(exctype) + str(value), QMessageBox.Ok)
                 
     def loadOptions(self):
+        '''Load options from options file'''
         self.options_file_path = os.path.join(self.user_config_dir, 'snopf_options.json')
         if not Path(self.options_file_path).exists():
             logger.info('snopf_options not found, creating new file')
@@ -191,23 +181,29 @@ class SnopfManager(QMainWindow):
         self.options['websocket-port'] = self.options.get('websocket-port', 60100)
     
     def getFileName(self):
+        '''Getter for filename property'''
         return self.__fileName
     
     def setFileName(self, fileName):
+        '''Setter for filename property'''
         self.__fileName = fileName
         self.setWindowTitle('Snopf %s' % self.__fileName)
     
+    # Filename of currently loaded file
     fileName = property(getFileName, setFileName)
     
     def fillKeymapCombobox(self):
+        '''Fill Keymap combobox with presets, e.h. hex, alphanumerical etc'''
         for name in pg.keymap_names.keys():
             self.ui.selectKeymapComboBox.addItem(name)
             
     def selectPresetKeymap(self, index):
+        '''Fill in corresponding keymap'''
         km = pg.keymaps[pg.keymap_names[self.ui.selectKeymapComboBox.currentText()]]
         self.ui.keymapEdit.clear()
         for char in km:
             self.ui.keymapEdit.insert(pg.KEY_TABLE[char])
+        self.atMapper.submit()
             
     def addAppendixValidator(self):
         '''Validator for appendix input that only allows input from snopf character table'''
@@ -220,192 +216,94 @@ class SnopfManager(QMainWindow):
             regex += '\\' + str(pg.KEY_TABLE[i])
         regex += ']*'
         validator = QRegExpValidator(QRegExp(regex), self)
-        self.ui.pwAppendixEdit.setValidator(validator)
+        self.ui.appendixEdit.setValidator(validator)
         
-    def getRules(self):
-        '''Get rules integer from selected checkboxes'''
-        rules = 0
-        if self.ui.includeLowercaseCB.isChecked():
-            rules += pg.PW_RULE_INCLUDE_LOWERCASE
-        if self.ui.includeUppercaseCB.isChecked():
-            rules += pg.PW_RULE_INCLUDE_UPPERCASE
-        if self.ui.includeNumericalCB.isChecked():
-            rules += pg.PW_RULE_INCLUDE_DIGIT
-        if self.ui.includeSpecialCB.isChecked():
-            rules += pg.PW_RULE_INCLUDE_SPECIAL
-        if self.ui.avoidRepCB.isChecked():
-            rules += pg.PW_RULE_NO_REP
-        if self.ui.avoidSeqCB.isChecked():
-            rules += pg.PW_RULE_NO_SEQ
-        return rules
-    
-    def setRulesUi(self, rules):
-        '''Set checkboxes according to rules'''
-        self.ui.includeLowercaseCB.setChecked(bool(rules & pg.PW_RULE_INCLUDE_LOWERCASE))
-        self.ui.includeUppercaseCB.setChecked(bool(rules & pg.PW_RULE_INCLUDE_UPPERCASE))
-        self.ui.includeNumericalCB.setChecked(bool(rules & pg.PW_RULE_INCLUDE_DIGIT))
-        self.ui.includeSpecialCB.setChecked(bool(rules & pg.PW_RULE_INCLUDE_SPECIAL))
-        self.ui.avoidRepCB.setChecked(bool(rules & pg.PW_RULE_NO_REP))
-        self.ui.avoidSeqCB.setChecked(bool(rules & pg.PW_RULE_NO_SEQ))
-        
-    def updateEntropy(self, *args, **kwargs):
-        '''Update the entropy field value'''
-        if not self.selectedEntry:
-            self.ui.entropyEdit.setText('')
-            return
-        entropy = pg.calc_entropy_password(self.selectedEntry['keymap'],
-                                           self.selectedEntry['password_length'])
-        self.ui.entropyEdit.setText('{:0.2f}'.format(entropy))
-        self.ui.entropyEdit.setStyleSheet('QLineEdit { background: rgb(255, 255, 255); }')
-        self.ui.entropyEdit.setToolTip('')
-        if self.selectedEntry['rules'] != 0:
-            self.ui.entropyEdit.setText('\N{WARNING SIGN} {:0.2f}'.format(entropy))
+    def decorateEntropy(self, value):
+        '''Set warning for entropy edit if necessary'''
+        if value.startswith('\N{WARNING SIGN}'):
             self.ui.entropyEdit.setStyleSheet('QLineEdit { background: rgb(240, 125, 125); }')
             self.ui.entropyEdit.setToolTip('Warning: The entropy might be lower than shown due to selected rules.')
+        else:
+            self.ui.entropyEdit.setStyleSheet('QLineEdit { background: rgb(255, 255, 255); }')
+            self.ui.entropyEdit.setToolTip('')
             
-    def initNewAccountTable(self):
-        '''Initialize tree widget with new account table entries'''
-        self.ui.accountTableWidget.initNewAccountTable(self.accountTable)
+    def initNewAccountTable(self, accountTable):
+        '''Initialize models and widgets for new account table'''
+        self.atModel = AccountTableModel(accountTable, self)
+        self.atModel.invalidNewData.connect(
+            lambda s: QMessageBox.warning(self, 'Invalid change', s, QMessageBox.Ok))
+        proxyModel = AccountTableViewProxyModel(self)
+        proxyModel.setSourceModel(self.atModel)
+        self.ui.accountTableView.setModel(proxyModel)
+        self.atMapper = QDataWidgetMapper()
+        self.atMapper.setModel(self.atModel)
+        self.atMapper.addMapping(self.ui.serviceEdit, self.atModel.keyColumns['service'])
+        self.atMapper.addMapping(self.ui.accountEdit, self.atModel.keyColumns['account'])
+        self.atMapper.addMapping(self.ui.commentEdit, self.atModel.keyColumns['comment'])
+        self.atMapper.addMapping(self.ui.lengthSpinner, self.atModel.keyColumns['password_length'])
+        self.atMapper.addMapping(self.ui.iterationSpinner, self.atModel.keyColumns['password_iteration'])
+        self.atMapper.addMapping(self.ui.includeLowercaseCB, self.atModel.keyColumns['include_lowercase'])
+        self.atMapper.addMapping(self.ui.includeUppercaseCB, self.atModel.keyColumns['include_uppercase'])
+        self.atMapper.addMapping(self.ui.includeDigitCB, self.atModel.keyColumns['include_digit'])
+        self.atMapper.addMapping(self.ui.includeSpecialCB, self.atModel.keyColumns['include_special'])
+        self.atMapper.addMapping(self.ui.avoidRepCB, self.atModel.keyColumns['no_repetitions'])
+        self.atMapper.addMapping(self.ui.avoidSeqCB, self.atModel.keyColumns['no_sequences'])
+        self.atMapper.addMapping(self.ui.keymapEdit, self.atModel.keyColumns['keymap'], b'keymap')
+        self.atMapper.addMapping(self.ui.appendixEdit, self.atModel.keyColumns['appendix'], b'keys')
+        self.atMapper.addMapping(self.ui.entropyEdit, self.atModel.keyColumns['entropy'])
+        self.atMapper.setSubmitPolicy(QDataWidgetMapper.AutoSubmit)
+        
         # Enable account table editing
         self.ui.actionNewEntry.setEnabled(True)
         self.ui.actionDeleteEntry.setEnabled(True)
         self.ui.actionSave.setEnabled(True)
         
-    def accountSelected(self, service, account):
-        '''Slot for activated item in account table tree widget'''
-        self.checkCommit()
-        self.selectedService = service
-        self.selectedAccount = account
-        self.selectedEntry = copy.deepcopy(self.accountTable[service][account])
-        self.ui.serviceEdit.setText(service)
-        self.ui.accountEdit.setText(account)
-        self.ui.commentEdit.setText(self.selectedEntry['comment'])
-        self.ui.lengthSpinner.setValue(self.selectedEntry['password_length'])
-        self.ui.iterationSpinner.setValue(self.selectedEntry['password_iteration'])
-        self.setRulesUi(self.selectedEntry['rules'])
-        self.updateEntropy()
-        self.ui.pwAppendixEdit.clear()
-        for a in self.selectedEntry['appendix']:
-            self.ui.pwAppendixEdit.insert(pg.KEY_TABLE[a])
-        self.ui.keymapEdit.clear()
-        for key in self.selectedEntry['keymap']:
-            self.ui.keymapEdit.insert(pg.KEY_TABLE[key])
+        self.ui.tabWidget.setCurrentIndex(0)
+        if len(accountTable):
+            self.ui.accountTableView.selectRow(0)
+            self.entrySelected(self.ui.accountTableView.currentIndex())
             
-    def tabChanged(self, index):
-        if not self.selectedEntry:
-            return
-        # Not really a change
-        if index == self.lastTabIndex:
-            return
-        # Check whether the changes we made are compatible
-        keymap = pg.keys_to_keymap(self.ui.keymapEdit.text())
-        if (not pg.check_keymap_valid(keymap)
-            or not pg.check_rules_valid(self.selectedEntry['rules'], keymap)):
-            self.ui.tabWidget.setCurrentIndex(self.lastTabIndex)
-            QMessageBox.information(self, 'Invalid Keymap',
-                                    'The chosen keymap and rules are incompatible',
-                                    QMessageBox.Ok)
-            return
-            
-        self.lastTabIndex = index
-        self.updateSelectedEntry()
+    def entrySelected(self, _index):
+        index = self.ui.accountTableView.model().mapToSource(_index)
+        self.atMapper.setCurrentModelIndex(index)
         
-    def checkCommit(self):
-        '''Check if the entry has been changed and ask for commit if necessary'''
-        if self.selectedEntry:
-            self.updateSelectedEntry()
-            if self.selectedEntry != self.accountTable[self.selectedService][self.selectedAccount]:
-                logger.info('Selected entry has new data')
-                if self.askUser('Entry changed',
-                                'The entry for %s / %s has been changed. Commit changes?' % (self.selectedService, self.selectedAccount)):
-                    logger.info('Commiting changes')
-                    self.commitChanges()
+    def mapSelectedEntryIndex(self):
+        '''Map selected entry of account table view to model index'''
+        return self.ui.accountTableView.model().mapToSource(self.ui.accountTableView.currentIndex())
     
-    def updateSelectedEntry(self):
-        '''Update currently selected entry with data from gui'''
-        if not self.selectedEntry:
-            return
-        self.selectedEntry['password_length'] = self.ui.lengthSpinner.value()
-        self.selectedEntry['password_iteration'] = self.ui.iterationSpinner.value()
-        self.selectedEntry['rules'] = self.getRules()
-        self.selectedEntry['keymap'] = pg.keys_to_keymap(self.ui.keymapEdit.text())
-        self.selectedEntry['comment'] = self.ui.commentEdit.text()
-        self.selectedEntry['appendix'] = [pg.KEY_TABLE.index(c) for c in self.ui.pwAppendixEdit.text()]
-        self.updateEntropy()
-        
-    def commitChanges(self):
-        '''Commit changed data to the account table in RAM (not persistent!)'''
-        if not self.selectedEntry:
-            return
-        logger.info('committing changes')
-        self.dataChanged = True
-        self.updateSelectedEntry()
-        self.accountTable[self.selectedService][self.selectedAccount].update(self.selectedEntry)
-                
     def deleteEntry(self):
         '''Delete the entry from the account table'''
-        service = self.ui.accountTableWidget.currentService()
-        account = self.ui.accountTableWidget.currentAccount()
-        if self.askUser('Remove Entry', 
-                        'Do you really want to remove the entry %s / %s' % (service, account)):
-            logger.info('Deleting selected item')
-            
-            self.ui.accountTableWidget.deleteEntry(service, account)
-            self.accountTable[service].pop(account)
-            if len(self.accountTable[service]) == 0:
-                self.accountTable.pop(service)
-                
-            self.selectedEntry = None
-
+        self.atModel.removeRow(self.mapSelectedEntryIndex())
+        
     def getAccounts(self):
-        '''Just return a hostname: accounts dictionary without additional information (passsword length etc.)'''
-        return {hostname: [account for account in self.accountTable[hostname].keys()]
-                for hostname in self.accountTable.keys()}
-    
-    def entryExists(self, service, account):
-        '''Check whether a service/account tuple already exists'''
-        return service in self.accountTable and account in self.accountTable[service]
-    
-    def addEntry(self, service, account):
-        '''Create a new entry in the account table using default values'''
-        if self.entryExists(service, account):
-            logger.warning('Attempted to create existing entry')
-            return
-        if not service in self.accountTable:
-            self.accountTable[service] = {}
+        '''Just return a service: accounts dictionary without additional information (passsword length etc.)'''
+        return self.atModel.getServiceAccounts()
             
-        self.accountTable[service][account] = at.create_entry()
-        self.ui.accountTableWidget.addItem(service, account)
-        self.dataChanged = True
-    
     def newEntry(self):
         '''Create a new entry'''
-        self.checkCommit()
         d = NewEntryDialog()
         if d.exec_() == QDialog.Accepted:
             service = d.service()
             account = d.account()
             
-            if self.entryExists(service, account):
+            try:
+                self.atModel.newEntry(service, account)
+            except KeyError:
                 QMessageBox.critical(self, 'Entry exists',
                                      'An entry for the same service and account already exists',
                                      QMessageBox.Ok)
                 return
             
-            self.addEntry(service, account)
-            
     def checkCurrentDataSave(self):
         '''Check if current account table has been changed and whether changes should be saved'''
-        self.checkCommit()
-        if self.dataChanged:
+        if self.atModel and self.atModel.tableChanged():
             if self.askUser('Account table has been changed',
-                              'Save current account table?'):
+                            'Save current account table?'):
                 logger.info('Saving current account table')
                 self.saveAccountTable()
         
     def newAccountTable(self):
         '''Create an empty account table'''
-        self.checkCurrentDataSave()
         # Set a master key for the new account table
         passphrase_one = self.getPassphrase()
         if passphrase_one == None:
@@ -422,13 +320,8 @@ class SnopfManager(QMainWindow):
                                  QMessageBox.Ok)
             return
         self.masterPassphrase = passphrase_one
-        self.accountTable = {}
-        self.initNewAccountTable()
+        self.initNewAccountTable(at.new_account_table())
         self.fileName = None
-        self.dataChanged = False
-        self.selectedService = None
-        self.selectedAccount = None
-        self.selectedEntry = None
         
     def getPassphrase(self, title=None, text=None):
         '''Get a master passphrase from user input'''
@@ -469,16 +362,15 @@ class SnopfManager(QMainWindow):
             QMessageBox.critical(self, 'File not found', 'File not found', QMessageBox.Ok)
             return
         try:
-            self.accountTable = json.loads(data['table'])
+            accountTable = json.loads(data['table'])
         except json.JSONDecodeError:
             logger.error('Could not decode json', exc_info=sys.exc_info())
             QMessageBox.critical(self, 'Error', 'Cannot read file', QMessageBox.Ok)
             return
         # All went well, update data to loaded table
         self.masterPassphrase = passphrase
-        self.dataChanged = False
         self.fileName = fileName
-        self.initNewAccountTable()
+        self.initNewAccountTable(accountTable)
     
     def saveAccountTable(self):
         '''Save curent account table to hard disk'''
@@ -488,9 +380,11 @@ class SnopfManager(QMainWindow):
             
         if not self.fileName.endswith('.snopf'):
             self.fileName += '.snopf'
+        # We have to update the mapping even if we don't change focus
+        self.atMapper.submit()
         try:
             with open(self.fileName, 'wb') as f:
-                at.save_account_table(f, self.accountTable, self.masterPassphrase,
+                at.save_account_table(f, self.atModel.getSaveData(), self.masterPassphrase,
                                       self.commitHash.encode()[:at.GIT_HASH_SIZE])
                 logger.info('Saving file')
         except IOError:
@@ -499,7 +393,8 @@ class SnopfManager(QMainWindow):
                                  QMessageBox.Ok)
             return
         
-        self.dataChanged = False
+        self.atModel.commitData()
+        
         
     def saveAccountTableAs(self):
         '''Save under new name'''
@@ -523,34 +418,32 @@ class SnopfManager(QMainWindow):
         account table if necessary
         '''
         if not service:
-            service = self.selectedService
-            account = self.selectedAccount
-        self.checkCommit()
-        
+            entry = self.atModel.table[self.mapSelectedEntryIndex().row()]
+        else:
+            logger.info('Password request with unknown service-account combination')
+            try:
+                entry = self.atModel.getEntry(service, account)
+            except KeyError:
+                if makeNewEntry:
+                    logger.info('Creating new entry')
+                    self.atModel.newEntry(service, account)
+                else:
+                    logger.warning('Unknown service-account but no new entry created')
+                    return
+                
         if not usb_comm.is_device_available():
             QMessageBox.critical(self, 'Device not found', 'The device is not plugged in.',
                                  QMessageBox.Ok)
             return
         
-        if not self.entryExists(service, account):
-            logger.info('Password request with unknown service-account combination')
-            if makeNewEntry:
-                logger.info('Creating new entry')
-                self.addEntry(service, account)
-            else:
-                logger.warning('Unknown service-account but no new entry created')
-                return
+        req_msg = requests.combine_standard_request(entry['service'].encode(),
+                                                    entry['account'].encode(),
+                                                    self.masterPassphrase,
+                                                    entry['password_iteration'])
         
-        password_iteration = self.accountTable[service][account]['password_iteration']
-        password_length = self.accountTable[service][account]['password_length']
-        rules = self.accountTable[service][account]['rules']
-        appendix = self.accountTable[service][account]['appendix']
-        keymap = self.accountTable[service][account]['keymap']
-        
-        req_msg = requests.combine_standard_request(service.encode(), account.encode(),
-                                                    self.masterPassphrase, password_iteration)
-        
-        req = usb_comm.build_request_message(req_msg, password_length, rules, appendix, keymap)
+        req = usb_comm.build_request_message(req_msg, entry['password_length'],
+                                             pg.bool_to_rules(entry), entry['appendix'],
+                                             entry['keymap'])
         dev = usb_comm.get_standard_device()
         if not dev:
             QMessageBox.critical(self, 'Device not found', 'The device is not plugged in.', QMessageBox.Ok)

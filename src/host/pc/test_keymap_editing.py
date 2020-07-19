@@ -77,5 +77,17 @@ def test_presets(qtbot):
             edit.insert(pg.KEY_TABLE[k])
         assert set(edit.text()) == set([pg.KEY_TABLE[k] for k in km])
     
+def test_keymap_property(qtbot):
+    km = [i for i in range(64)]
+    edit = KeymapLineEdit()
+    edit.setKeymap(km)
+    assert edit.text() == ''.join(pg.KEY_TABLE)
+    assert edit.getKeymap() == km
         
+def test_keymap_property_clear(qtbot):
+    edit = KeymapLineEdit()
+    edit.setKeymap(pg.keymaps['lowercase'])
+    assert edit.getKeymap() == pg.keymaps['lowercase']
+    edit.setKeymap(pg.keymaps['uppercase'])
+    assert edit.getKeymap() == pg.keymaps['uppercase']
     

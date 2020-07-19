@@ -54,19 +54,59 @@ class KeymapLineEdit(QLineEdit):
         typed into the lineedit'''
         return pg.sort_keys(pg.key_table_set.difference(set(self.text())))
    
+    def _updateFocus(f):
+        def wrap(self) :
+            self.setFocus()
+            f(self)
+            self.clearFocus()
+        return wrap
+    
+    @_updateFocus
     def addLowercase(self):
         '''Add all possible lowercase keys'''
         for char in pg.KEY_TABLE[:pg.PW_GROUP_BOUND_LOWERCASE]:
             self.insert(char)
-            
+    
+    @_updateFocus
     def addUppercase(self):
         for char in pg.KEY_TABLE[pg.PW_GROUP_BOUND_LOWERCASE:pg.PW_GROUP_BOUND_UPPERCASE]:
             self.insert(char)
     
+    @_updateFocus
     def addNumerical(self):
         for char in pg.KEY_TABLE[pg.PW_GROUP_BOUND_UPPERCASE:pg.PW_GROUP_BOUND_DIGIT]:
             self.insert(char)
     
+    @_updateFocus
     def addSpecial(self):
         for char in pg.KEY_TABLE[pg.PW_GROUP_BOUND_DIGIT:]:
             self.insert(char)
+            
+    def getKeymap(self):
+        return pg.keys_to_keymap(self.text())
+    
+    def setKeymap(self, keymap):
+        self.clear()
+        for key in keymap:
+            self.insert(pg.KEY_TABLE[key])
+        
+    keymap = Property('QVariantList', getKeymap, setKeymap)
+    
+class AppendixEdit(QLineEdit):
+    
+    '''
+    Line Edit for appendix
+    '''
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setMaxLength(3)
+
+    def getKeys(self):
+        return [pg.KEY_TABLE.index(key) for key in self.text()]
+    
+    def setKeys(self, appendix):
+        self.clear()
+        for key in appendix:
+            self.insert(pg.KEY_TABLE[key])
+        
+    keys = Property('QVariantList', getKeys, setKeys)
