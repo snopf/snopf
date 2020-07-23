@@ -5,6 +5,7 @@
 #include "poll_delay.h"
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include "usbdrv.h"
 
 void io_init(void)
 {
@@ -23,12 +24,14 @@ int8_t io_wait_for_user_bttn(void)
 #endif
     IO_LED_ON;
     
-    for (uint8_t i = 0; i < 100; i++) {
-        poll_delay_ms(100);
+    // Wait 10 seconds for the user to press the button
+    for (uint16_t i = 0; i < 2000; i++) {
+        _delay_ms(5);
         if (IO_BUTTON_PRESSED) {
             IO_LED_OFF;
             return 1;
         }
+        usbPoll();
     }
     // The user didn't press the button in time
     IO_LED_OFF;
