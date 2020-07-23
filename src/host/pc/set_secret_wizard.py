@@ -7,7 +7,6 @@
 QT Wizard for setting the secret 
 '''
 
-# TODO add a "new secret successfully set message"
 # TODO dice rolls etc.
 
 from ui_set_secret_wizard import Ui_SetSecretWizard
@@ -108,6 +107,9 @@ class SetSecretWizard(QWizard):
                     QMessageBox.Ok)
                 return False
             logger.info('Check ok')
+            QMessageBox.information(self, 'New Secret Set',
+                                    'The new secret has been successfully set.',
+                                    QMessageBox.Ok)
             return True
         
         return True
