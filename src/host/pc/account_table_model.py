@@ -57,9 +57,13 @@ class AccountTableModel(QAbstractTableModel):
         self.deletedItems = [False for i in self.table]
     
     def rowCount(self, parent=None):
+        if parent and parent.isValid():
+            return 0
         return len(self.table)
     
     def columnCount(self, parent):
+        if parent and parent.isValid():
+            return 0
         return len(self.keyColumns)
     
     def data(self, index, role=Qt.DisplayRole):

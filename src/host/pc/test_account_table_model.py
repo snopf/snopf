@@ -60,5 +60,8 @@ def testSetData(qtbot):
     for key, km in keymaps.items():
         assert model.setData(index, km, Qt.EditRole) == True
     
+def test_item_model_tester(qtmodeltester):
+    at = get_test_account_table()
+    model = AccountTableModel(at)
+    qtmodeltester.check(model)
     
-        
