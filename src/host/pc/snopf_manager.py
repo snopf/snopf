@@ -427,6 +427,7 @@ class SnopfManager(QMainWindow):
                 if makeNewEntry:
                     logger.info('Creating new entry')
                     self.atModel.newEntry(service, account)
+                    entry = self.atModel.getEntry(service, account)
                 else:
                     logger.warning('Unknown service-account but no new entry created')
                     return
