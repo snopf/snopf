@@ -198,11 +198,7 @@ class SnopfManager(QMainWindow):
             
     def selectPresetKeymap(self, index):
         '''Fill in corresponding keymap'''
-        km = pg.keymaps[pg.keymap_names[self.ui.selectKeymapComboBox.currentText()]]
-        self.ui.keymapEdit.clear()
-        for char in km:
-            self.ui.keymapEdit.insert(pg.KEY_TABLE[char])
-        self.atMapper.submit()
+        self.ui.keymapEdit.setKeymap(pg.keymaps[pg.keymap_names[self.ui.selectKeymapComboBox.currentText()]])
             
     def addAppendixValidator(self):
         '''Validator for appendix input that only allows input from snopf character table'''

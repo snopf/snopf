@@ -54,10 +54,10 @@ class KeymapLineEdit(QLineEdit):
         typed into the lineedit'''
         return pg.sort_keys(pg.key_table_set.difference(set(self.text())))
    
-    def _updateFocus(f):
-        def wrap(self) :
+    def _updateFocus(f, *args, **kwargs):
+        def wrap(self, *args, **kwargs):
             self.setFocus()
-            f(self)
+            f(self, *args, **kwargs)
             self.clearFocus()
         return wrap
     
@@ -81,16 +81,22 @@ class KeymapLineEdit(QLineEdit):
     def addSpecial(self):
         for char in pg.KEY_TABLE[pg.PW_GROUP_BOUND_DIGIT:]:
             self.insert(char)
-            
-    def getKeymap(self):
-        return pg.keys_to_keymap(self.text())
     
+    @_updateFocus        
     def setKeymap(self, keymap):
         self.clear()
         for key in keymap:
             self.insert(pg.KEY_TABLE[key])
+            
+    def _getKeymap(self):
+        return pg.keys_to_keymap(self.text())
+    
+    def _setKeymap(self, keymap):
+        self.clear()
+        for key in keymap:
+            self.insert(pg.KEY_TABLE[key])
         
-    keymap = Property('QVariantList', getKeymap, setKeymap)
+    keymap = Property('QVariantList', _getKeymap, _setKeymap)
     
 class AppendixEdit(QLineEdit):
     
