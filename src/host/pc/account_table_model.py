@@ -158,9 +158,11 @@ class AccountTableModel(QAbstractTableModel):
     
     def commitData(self):
         '''Apply all data changes'''
+        self.beginResetModel()
         self.table = at.sort_account_table(self.getLiveEntries())
         self.deletedItems = [False for i in self.table]
         self.originalTable = copy.deepcopy(self.table)
+        self.endResetModel()
         
     def getSaveData(self):
         '''Get data for persistent storage'''
