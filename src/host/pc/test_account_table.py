@@ -51,3 +51,12 @@ def test_get_entry():
     table.append(create_entry('service', 'account'))
     assert get_entry(table, 'service', 'account')
     
+def test_add_entry():
+    table = new_account_table()
+    add_entry(table, create_entry('service', 'account'))
+    with pytest.raises(KeyError):
+        add_entry(table, table[0])
+    entry = create_entry('new_service', 'new_account')
+    add_entry(table, entry)
+    assert table[-1] == entry
+    assert check_entry_exists(table, 'new_service', 'new_account')
