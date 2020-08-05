@@ -108,7 +108,7 @@ class AccountTableModel(QAbstractTableModel):
     
     def setData(self, index, value, role):
         colKey = self.columnKeys[index.column()]
-        if colKey == 'entropy':
+        if colKey == 'entropy' or colKey=='service' or colKey=='account':
             return False
         if role == Qt.EditRole:
             # First check whether the new data would break rules
