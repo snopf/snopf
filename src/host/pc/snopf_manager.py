@@ -39,7 +39,6 @@ logger = logging.getLogger('main')
 class SnopfManager(QMainWindow):
 
 # TODO Add last date changed entry (+ what was changed?)
-# TODO change keyboard layout on device tool
 # TODO test cases with mockup
 # TODO undo / redo
 # TODO make backups of loaded account tables
