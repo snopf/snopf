@@ -257,6 +257,7 @@ class SnopfManager(QMainWindow):
         self.ui.actionNewEntry.setEnabled(True)
         self.ui.actionDeleteEntry.setEnabled(True)
         self.ui.actionSave.setEnabled(True)
+        self.ui.actionSaveAs.setEnabled(True)
         
         self.ui.tabWidget.setCurrentIndex(0)
         if len(accountTable):
