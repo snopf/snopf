@@ -138,9 +138,9 @@ class AccountTableModel(QAbstractTableModel):
             raise KeyError('Entry already exists')
         index = self.rowCount()
         at.add_new_entry(self.table, service, account)
+        self.deletedItems.append(False)
         self.beginInsertRows(QModelIndex(), index, index)
         self.endInsertRows()
-        self.deletedItems.append(False)
         return True
     
     def removeRow(self, index):
