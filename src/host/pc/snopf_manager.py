@@ -420,10 +420,10 @@ class SnopfManager(QMainWindow):
         if not service:
             entry = self.atModel.table[self.mapSelectedEntryIndex().row()]
         else:
-            logger.info('Password request with unknown service-account combination')
             try:
                 entry = self.atModel.getEntry(service, account)
             except KeyError:
+                logger.info('Password request with unknown service-account combination')
                 if makeNewEntry:
                     logger.info('Creating new entry')
                     self.atModel.newEntry(service, account)
