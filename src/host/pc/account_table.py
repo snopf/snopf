@@ -101,6 +101,18 @@ def create_entry(service, account):
     entry['appendix'] = []
     return entry
 
+def add_entry(account_table, entry):
+    '''Add new entry to the account table if it doesn't exist yet'''
+    if not check_entry_exists(account_table, entry['service'], entry['account']):
+        account_table.append(entry)
+    else:
+        raise KeyError('Entry exists')
+    
+def add_new_entry(account_table, service, account):
+    '''Add new entry for given service and account with default values'''
+    entry = create_entry(service, account)
+    add_entry(account_table, entry)
+
 def check_entry_exists(account_table, service, account):
     '''Return True if an entry with the given service, account already exists'''
     for entry in account_table:

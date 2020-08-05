@@ -137,8 +137,7 @@ class AccountTableModel(QAbstractTableModel):
         if at.check_entry_exists(self.table, service, account):
             raise KeyError('Entry already exists')
         index = self.rowCount()
-        entry = at.create_entry(service, account)    
-        self.table.append(entry)
+        at.add_new_entry(self.table, service, account)
         self.beginInsertRows(QModelIndex(), index, index)
         self.endInsertRows()
         self.deletedItems.append(False)
