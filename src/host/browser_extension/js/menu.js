@@ -15,6 +15,9 @@ var add_new_entries = false;
 // Port to use for websocket
 var websocket_port = null;
 
+// Our ID to identify to websocket server
+var websocket_id = null;
+
 // Automatically hit enter after typing in the password
 var hit_enter = false;
 
@@ -27,7 +30,7 @@ var service_guess = '';
 // Guess for the account
 var account_guess = '';
 
-// Set the optional variables and open a websocket after retrivieng options
+// Set the optional variables and open a websocket after retrieving options
 function set_options(items) {
     add_new_entries = items.add_new_entries;
     if (add_new_entries) {
@@ -35,10 +38,18 @@ function set_options(items) {
     }
     websocket_port = items.websocket_port;
     hit_enter = items.hit_enter;
-    webSocket = new WebSocket('ws://localhost:' + String(websocket_port))
+    webSocket = new WebSocket('ws://localhost:' + String(websocket_port));
+    websocket_id = items.websocket_id;
     webSocket.onopen = websocket_onopen;
     webSocket.onerror = websocket_onerror;
     webSocket.onmessage = websocket_onmessage;
+}
+
+// Send message over websocket
+function websocket_send_message(msg)
+{
+    msg['id'] = websocket_id;
+    webSocket.send(JSON.stringify(msg));
 }
 
 // Get the current options
@@ -47,7 +58,8 @@ function get_options()
     chrome.storage.sync.get({
         'add_new_entries': true,
         'hit_enter': false,
-        'websocket_port': 60100},
+        'websocket_port': 60100,
+        'websocket_id': ''},
         set_options);
 }
 
@@ -56,9 +68,9 @@ function websocket_onopen(event)
 {
     $('#no-snopf-server-notice').hide();
     $('#device-not-connected-notice').show();
-    webSocket.send(JSON.stringify({cmd: 'get-accounts'}));
+    websocket_send_message({cmd: 'get-accounts'});
 }
-    
+
 // Error handler for websocket connection
 function websocket_onerror(event) {
     console.error('WebSocket error:', event);
@@ -70,7 +82,7 @@ function websocket_onmessage (event) {
     switch (msg.cmd) {
         case 'new-accounts':
             accounts = msg.data;
-            webSocket.send(JSON.stringify({cmd: 'get-device-available'}))
+            websocket_send_message({cmd: 'get-device-available'});
             $('#input-service').autocomplete({source: Object.keys(accounts)});
             $('#input-service').val(service_guess);
             fill_account_suggestions();
@@ -101,13 +113,13 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 // Handler for messages from the content script
 function content_port_message_handler(message) {
     dbg_message('Content -> Menu: ' + JSON.stringify(message));
-    
+
     switch (message.cmd) {
         case 'error':
             window.alert(message.msg);
             window.close();
             break;
-        
+
         case 'website-info':
             service_guess = (message.msg['hostname']);
             account_guess = message.msg['username'];
@@ -133,8 +145,8 @@ function send_request() {
     req.hit_enter = hit_enter;
     req.add_new_entries = add_new_entries;
     msg = {cmd: 'password-request', data: req};
-    webSocket.send(JSON.stringify(msg));
-    
+    websocket_send_message(msg);
+
     // Refocus on the password field on the website
     if (content_port) {
         try {
@@ -143,7 +155,7 @@ function send_request() {
             dbg_message('Cannot connect to content script');
         }
     }
-    
+
     window.close();
 }
 

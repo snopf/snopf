@@ -19,6 +19,7 @@ import account_table as at
 from websocket_server import SnopfWebsocketServer
 import keyboard_layouts
 from account_table_model import AccountTableModel, AccountTableViewProxyModel
+from options_dialog import OptionsDialog
 
 import logging
 import sys
@@ -45,23 +46,24 @@ class SnopfManager(QMainWindow):
 # TODO autosave every n minutes / after every new entry
 # TODO secure websocket connection (whitelisting)
 # TODO option for allowing/disallowing new entries from websockets
-    
+# TODO only allow connections to websocket if an account table is active
+
     def __init__(self, configPath=None):
         super().__init__()
         self.ui = Ui_SnopfManager()
         self.ui.setupUi(self)
-        
+
         # Log uncaught exceptions
         sys.excepthook = self.logException
-        
+
         logger.info('Application started')
-        
+
         # Setting up directories for app
         self.user_data_dir = appdirs.user_data_dir('snopf-manager', 'snopf')
         if not os.path.exists(self.user_data_dir):
             logger.info('Creating user data dir: %s' % str(self.user_data_dir))
             os.makedirs(self.user_data_dir)
-            
+
         self.user_config_dir = configPath
         if not self.user_config_dir:
             self.user_config_dir = appdirs.user_config_dir('snopf-manager', 'snopf')
@@ -69,33 +71,33 @@ class SnopfManager(QMainWindow):
             logger.info('Creating user config dir: %s' % str(self.user_config_dir))
             os.makedirs(self.user_config_dir)
         logger.info('Working with user config dir: %s' % str(self.user_config_dir))
-            
+
         # Initialize tray icon
         self.tray = QSystemTrayIcon()
         self.tray.setIcon(QIcon(':/icon/icon/icon.svg'))
         self.tray.setToolTip('Snopf')
         trayMenu = QMenu(self)
-        actionExit = trayMenu.addAction('Exit') 
+        actionExit = trayMenu.addAction('Exit')
         actionExit.triggered.connect(self.exit)
         self.tray.setContextMenu(trayMenu)
         self.tray.activated.connect(self.trayIconActivated)
         self.tray.show()
-        
+
         # Master passphrase for current account table
         self.masterPassphrase = None
-        
+
         # Filename of open account table
         self.__fileName = None
-        
+
         # Model for Account Table data
         self.atModel = None
         # Mapper for widgets <> model
         self.atMapper = None
-        
+
         # Software version
         self.commitHash = get_commit_hash()
         logger.info('Git hash: %s' % self.commitHash)
-        
+
         # Connect menu actions
         self.ui.actionNew.triggered.connect(self.newAccountTable)
         self.ui.actionOpen.triggered.connect(self.openAccountTable)
@@ -103,26 +105,26 @@ class SnopfManager(QMainWindow):
         self.ui.actionSaveAs.triggered.connect(self.saveAccountTableAs)
         self.ui.actionSave.setEnabled(False)
         self.ui.actionSaveAs.setEnabled(False)
-        
+        self.ui.actionOptions.triggered.connect(self.editOptions)
         self.ui.actionExit.triggered.connect(self.exit)
-        
+
         self.ui.actionNewEntry.triggered.connect(self.newEntry)
         self.ui.actionDeleteEntry.triggered.connect(self.deleteEntry)
         # Entry modyfing only makes sense if we have an active account table
         self.ui.actionNewEntry.setEnabled(False)
         self.ui.actionDeleteEntry.setEnabled(False)
-        
+
         self.ui.actionVersionInfo.triggered.connect(self.showVersionInfo)
         self.ui.actionSetSnopfSecret.triggered.connect(self.startSecretWizard)
         self.ui.actionSetKeyboardDelay.triggered.connect(self.setKeyboardDelay)
         self.ui.actionSetKeyboardLayout.triggered.connect(self.setKeyboardLayout)
-        
+
         # Account table
         self.ui.deleteEntryButton.clicked.connect(self.deleteEntry)
         self.ui.requestPasswordButton.clicked.connect(lambda x: self.requestPassword())
         self.ui.accountTableView.activated.connect(self.entrySelected)
         self.ui.entropyEdit.textChanged.connect(self.decorateEntropy)
-        
+
         # Keymap editing
         self.ui.keymapEdit.keymapChanged.connect(
             lambda remKeys: self.ui.remainingKeysEdit.setText(''.join(remKeys)))
@@ -132,38 +134,41 @@ class SnopfManager(QMainWindow):
         self.ui.addSpecialButton.clicked.connect(self.ui.keymapEdit.addSpecial)
         self.ui.applyKeymapButton.clicked.connect(self.selectPresetKeymap)
         self.fillKeymapCombobox()
-        
+
         # Appendix
         self.addAppendixValidator()
-        
+
         # Password settings
         self.ui.lengthSpinner.setMinimum(pg.MIN_PW_LENGTH)
         self.ui.lengthSpinner.setMaximum(pg.MAX_PW_LENGTH)
         self.ui.lengthSpinner.setValue(pg.DEFAULT_PW_LENGTH)
-        
+
         # Load snopf options file
         self.loadOptions()
-        
+
         # Load last loaded file if available
         if self.options['last-filename']:
             try:
                 self.openAccountTable(self.options['last-filename'])
             except FileNotFoundError:
                 logger.warning('Last file % s not found, skipping auto load' % lastFileName)
-        
+
         # Init websocket server
-        self.websocketServer = SnopfWebsocketServer(self, self.options['websocket-port'])
+        self.websocketServer = SnopfWebsocketServer(self, self.options['websocket-port'],
+                                                    self.options['websocket-whitelist'])
         self.websocketServer.deviceAvailableRequest.connect(
             lambda ws: self.websocketServer.sendDeviceAvailable(ws, usb_comm.is_device_available()))
         self.websocketServer.accountsRequest.connect(
             lambda ws: self.websocketServer.sendAccountsList(ws, self.getAccounts()))
         self.websocketServer.passwordRequest.connect(self.requestPassword)
-        
+        if self.options['websocket-enabled']:
+            self.websocketServer.listen()
+
     def logException(self, exctype, value, traceback):
         '''Log uncaught execptions and show an info message'''
         logger.error('Exception', exc_info=(exctype, value, traceback))
         QMessageBox.critical(self, 'Uncaught Exception', str(exctype) + str(value), QMessageBox.Ok)
-                
+
     def loadOptions(self):
         '''Load options from options file'''
         self.options_file_path = os.path.join(self.user_config_dir, 'snopf_options.json')
@@ -174,32 +179,55 @@ class SnopfManager(QMainWindow):
         with open(self.options_file_path, 'r') as f:
             logger.info('loading snopf options')
             self.options = json.load(f)
-        
+
         # Initialize to default values if not set
         self.options['last-filename'] = self.options.get('last-filename', None)
         self.options['websocket-port'] = self.options.get('websocket-port', 60100)
-    
+        self.options['websocket-whitelist'] = self.options.get('websocket-whitelist', {})
+        self.options['websocket-enabled'] = self.options.get('websocket-enabled', False)
+
+    def initWebsocketServer(self):
+        '''Initialize websocket server with options'''
+        if not self.options['websocket-enabled']:
+            logger.info('Websocket server is disabled')
+            if self.websocketServer:
+                logger.info('Closing down running websocket server')
+                self.websocketServer.deviceAvailableRequest.disconnect()
+                self.websocketServer.accountsRequest.disconnect()
+                self.websocketServer.passwordRequest.disconnect()
+                self.websocketServer.close()
+                self.websocketServer = None
+            return
+        logger.info('Initializing new websocket server')
+        self.websocketServer = SnopfWebsocketServer(self, self.options['websocket-port'],
+                                                    self.options['websocket-whitelist'])
+        self.websocketServer.deviceAvailableRequest.connect(
+            lambda ws: self.websocketServer.sendDeviceAvailable(ws, usb_comm.is_device_available()))
+        self.websocketServer.accountsRequest.connect(
+            lambda ws: self.websocketServer.sendAccountsList(ws, self.getAccounts()))
+        self.websocketServer.passwordRequest.connect(self.requestPassword)
+
     def getFileName(self):
         '''Getter for filename property'''
         return self.__fileName
-    
+
     def setFileName(self, fileName):
         '''Setter for filename property'''
         self.__fileName = fileName
         self.setWindowTitle('Snopf %s' % self.__fileName)
-    
+
     # Filename of currently loaded file
     fileName = property(getFileName, setFileName)
-    
+
     def fillKeymapCombobox(self):
         '''Fill Keymap combobox with presets, e.h. hex, alphanumerical etc'''
         for name in pg.keymap_names.keys():
             self.ui.selectKeymapComboBox.addItem(name)
-            
+
     def selectPresetKeymap(self, index):
         '''Fill in corresponding keymap'''
         self.ui.keymapEdit.setKeymap(pg.keymaps[pg.keymap_names[self.ui.selectKeymapComboBox.currentText()]])
-            
+
     def addAppendixValidator(self):
         '''Validator for appendix input that only allows input from snopf character table'''
         regex = '^['
@@ -212,7 +240,7 @@ class SnopfManager(QMainWindow):
         regex += ']*'
         validator = QRegExpValidator(QRegExp(regex), self)
         self.ui.appendixEdit.setValidator(validator)
-        
+
     def decorateEntropy(self, value):
         '''Set warning for entropy edit if necessary'''
         if value.startswith('\N{WARNING SIGN}'):
@@ -221,7 +249,7 @@ class SnopfManager(QMainWindow):
         else:
             self.ui.entropyEdit.setStyleSheet('QLineEdit { background: rgb(255, 255, 255); }')
             self.ui.entropyEdit.setToolTip('')
-            
+
     def initNewAccountTable(self, accountTable):
         '''Initialize models and widgets for new account table'''
         self.atModel = AccountTableModel(accountTable, self)
@@ -247,41 +275,41 @@ class SnopfManager(QMainWindow):
         self.atMapper.addMapping(self.ui.appendixEdit, self.atModel.keyColumns['appendix'], b'keys')
         self.atMapper.addMapping(self.ui.entropyEdit, self.atModel.keyColumns['entropy'])
         self.atMapper.setSubmitPolicy(QDataWidgetMapper.AutoSubmit)
-        
+
         # Enable account table editing
         self.ui.actionNewEntry.setEnabled(True)
         self.ui.actionDeleteEntry.setEnabled(True)
         self.ui.actionSave.setEnabled(True)
         self.ui.actionSaveAs.setEnabled(True)
-        
+
         self.ui.tabWidget.setCurrentIndex(0)
         if len(accountTable):
             self.ui.accountTableView.selectRow(0)
             self.entrySelected(self.ui.accountTableView.currentIndex())
-            
+
     def entrySelected(self, _index):
         index = self.ui.accountTableView.model().mapToSource(_index)
         self.atMapper.setCurrentModelIndex(index)
-        
+
     def mapSelectedEntryIndex(self):
         '''Map selected entry of account table view to model index'''
         return self.ui.accountTableView.model().mapToSource(self.ui.accountTableView.currentIndex())
-    
+
     def deleteEntry(self):
         '''Delete the entry from the account table'''
         self.atModel.removeRow(self.mapSelectedEntryIndex())
-        
+
     def getAccounts(self):
         '''Just return a service: accounts dictionary without additional information (passsword length etc.)'''
         return self.atModel.getServiceAccounts()
-            
+
     def newEntry(self):
         '''Create a new entry'''
         d = NewEntryDialog()
         if d.exec_() == QDialog.Accepted:
             service = d.service()
             account = d.account()
-            
+
             try:
                 self.atModel.newEntry(service, account)
             except KeyError:
@@ -289,7 +317,7 @@ class SnopfManager(QMainWindow):
                                      'An entry for the same service and account already exists',
                                      QMessageBox.Ok)
                 return
-            
+
     def checkCurrentDataSave(self):
         '''Check if current account table has been changed and whether changes should be saved'''
         if self.atModel and self.atModel.tableChanged():
@@ -297,7 +325,7 @@ class SnopfManager(QMainWindow):
                             'Save current account table?'):
                 logger.info('Saving current account table')
                 self.saveAccountTable()
-        
+
     def newAccountTable(self):
         '''Create an empty account table'''
         # Set a master key for the new account table
@@ -318,7 +346,7 @@ class SnopfManager(QMainWindow):
         self.masterPassphrase = passphrase_one
         self.initNewAccountTable(at.new_account_table())
         self.fileName = None
-        
+
     def getPassphrase(self, title=None, text=None):
         '''Get a master passphrase from user input'''
         if not title:
@@ -329,7 +357,7 @@ class SnopfManager(QMainWindow):
         if ok:
             return passphrase.encode()
         return None
-    
+
     def openAccountTable(self, fileName=None):
         '''Open existing account table file'''
         self.checkCurrentDataSave()
@@ -337,7 +365,7 @@ class SnopfManager(QMainWindow):
             if self.fileName:
                 path = os.path.dirname(self.fileName)
             else:
-                path = self.user_data_dir        
+                path = self.user_data_dir
             fileName,_ = QFileDialog.getOpenFileName(
                 self, 'Open Account Table', path, 'Account table (*.snopf)')
         if not fileName:
@@ -367,13 +395,13 @@ class SnopfManager(QMainWindow):
         self.masterPassphrase = passphrase
         self.fileName = fileName
         self.initNewAccountTable(accountTable)
-    
+
     def saveAccountTable(self):
         '''Save curent account table to hard disk'''
         if not self.fileName:
             self.saveAccountTableAs()
             return
-            
+
         if not self.fileName.endswith('.snopf'):
             self.fileName += '.snopf'
         # We have to update the mapping even if we don't change focus
@@ -388,10 +416,10 @@ class SnopfManager(QMainWindow):
             QMessageBox.critical(self, 'Error', 'Cannot write to file %s' % self.fileName,
                                  QMessageBox.Ok)
             return
-        
+
         self.atModel.commitData()
-        
-        
+
+
     def saveAccountTableAs(self):
         '''Save under new name'''
         if self.fileName:
@@ -404,7 +432,7 @@ class SnopfManager(QMainWindow):
             return
         self.fileName = fileName
         self.saveAccountTable()
-        
+
     def requestPassword(self, service=None, account=None, makeNewEntry=False):
         '''
         Make a password request using the given service and account combination.
@@ -427,17 +455,17 @@ class SnopfManager(QMainWindow):
                 else:
                     logger.warning('Unknown service-account but no new entry created')
                     return
-                
+
         if not usb_comm.is_device_available():
             QMessageBox.critical(self, 'Device not found', 'The device is not plugged in.',
                                  QMessageBox.Ok)
             return
-        
+
         req_msg = requests.combine_standard_request(entry['service'].encode(),
                                                     entry['account'].encode(),
                                                     self.masterPassphrase,
                                                     entry['password_iteration'])
-        
+
         req = usb_comm.build_request_message(req_msg, entry['password_length'],
                                              pg.bool_to_rules(entry), entry['appendix'],
                                              entry['keymap'])
@@ -445,14 +473,14 @@ class SnopfManager(QMainWindow):
         if not dev:
             QMessageBox.critical(self, 'Device not found', 'The device is not plugged in.', QMessageBox.Ok)
             return
-        
+
         try:
             usb_comm.send_message(dev, req)
         except USBError as e:
-            QMessageBox.critical(self, 'USB error', 'Cannot send to USB device. %s' % str(e), 
+            QMessageBox.critical(self, 'USB error', 'Cannot send to USB device. %s' % str(e),
                                  QMessageBox.Ok)
             logger.error('USB Error', exc_info=sys.exc_info())
-        
+
     def setKeyboardDelay(self):
         '''Set the keyboard delay for a connected snopf device'''
         delay, ok = QInputDialog.getInt(self, 'Set Keyboard Delay', 'Delay in ms', 10, 0, 255)
@@ -467,7 +495,7 @@ class SnopfManager(QMainWindow):
             QMessageBox.information(self, 'Setting Keyboard Delay',
                                     'Press the Button on the device to set the new delay.',
                                     QMessageBox.Ok)
-    
+
     def setKeyboardLayout(self):
         '''Set a new keyboard layout on a connected Snopf device'''
         fileName,_ = QFileDialog.getOpenFileName(self, 'Open Keyboard Layout File',
@@ -493,23 +521,38 @@ class SnopfManager(QMainWindow):
                                 'Press the Button on the device for five seconds to set new keyboard layout.',
                                 QMessageBox.Ok)
         logger.info('New Keyboard layout set')
-    
+
     def askUser(self, title, question):
         '''Get yes / no answer from user'''
         qm = QMessageBox
         ret = qm.question(self, title, question, qm.Yes | qm.No)
         return ret == qm.Yes
-    
+
     def showVersionInfo(self):
         QMessageBox.information(
             self, 'Version Info', 'Git commit: %s' % self.commitHash,
             QMessageBox.Ok)
-        
+
     def startSecretWizard(self):
         '''Change the secret on the connected snopf device'''
         logger.info('Secret wizard started')
         w = SetSecretWizard(self)
         w.show()
+
+    def editOptions(self):
+        '''Show dialog for option editing'''
+        diag = OptionsDialog(self)
+        logger.info('Options dialog started')
+        if diag.exec_() == QDialog.Accepted:
+            self.options.update(diag.getOptions())
+            logger.info('Options changed')
+            self.websocketServer.updatePort(self.options['websocket-port'])
+            self.websocketServer.updateWhitelist(self.options['websocket-whitelist'])
+            if self.options['websocket-enabled']:
+                if not self.websocketServer.isListening():
+                    self.websocketServer.listen()
+            else:
+                self.websocketServer.close()
 
     def saveOptions(self):
         '''Save current app options to persistent json'''
@@ -517,21 +560,21 @@ class SnopfManager(QMainWindow):
         self.options['last-filename'] = self.fileName
         with open(self.options_file_path, 'w') as f:
             json.dump(self.options, f)
-            
+
     def trayIconActivated(self, reason):
         if reason != QSystemTrayIcon.Context:
             logger.info('Maximizing from tray')
             self.show()
-        
+
     def closeEvent(self, event):
         logger.info('Minimizing to tray')
         self.hide()
         event.ignore()
-        
+
     def cleanup(self):
         '''Clean up before closing'''
         self.websocketServer.close()
-        
+
     def exit(self):
         self.checkCurrentDataSave()
         self.saveOptions()

@@ -750,6 +750,7 @@
     <addaction name="actionSetSnopfSecret"/>
     <addaction name="actionSetKeyboardDelay"/>
     <addaction name="actionSetKeyboardLayout"/>
+    <addaction name="actionOptions"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEntries"/>
@@ -828,6 +829,11 @@
   <action name="actionSetKeyboardLayout">
    <property name="text">
     <string>Set Keyboard &amp;Layout</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options</string>
    </property>
   </action>
  </widget>
