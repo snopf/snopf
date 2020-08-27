@@ -44,7 +44,6 @@ class SnopfManager(QMainWindow):
 # TODO undo / redo
 # TODO make backups of loaded account tables
 # TODO autosave every n minutes / after every new entry
-# TODO secure websocket connection (whitelisting)
 # TODO option for allowing/disallowing new entries from websockets
 # TODO only allow connections to websocket if an account table is active
 
