@@ -183,27 +183,6 @@ class SnopfManager(QMainWindow):
         self.options['websocket-whitelist'] = self.options.get('websocket-whitelist', {})
         self.options['websocket-enabled'] = self.options.get('websocket-enabled', False)
 
-    def initWebsocketServer(self):
-        '''Initialize websocket server with options'''
-        if not self.options['websocket-enabled']:
-            logger.info('Websocket server is disabled')
-            if self.websocketServer:
-                logger.info('Closing down running websocket server')
-                self.websocketServer.deviceAvailableRequest.disconnect()
-                self.websocketServer.accountsRequest.disconnect()
-                self.websocketServer.passwordRequest.disconnect()
-                self.websocketServer.close()
-                self.websocketServer = None
-            return
-        logger.info('Initializing new websocket server')
-        self.websocketServer = SnopfWebsocketServer(self, self.options['websocket-port'],
-                                                    self.options['websocket-whitelist'])
-        self.websocketServer.deviceAvailableRequest.connect(
-            lambda ws: self.websocketServer.sendDeviceAvailable(ws, usb_comm.is_device_available()))
-        self.websocketServer.accountsRequest.connect(
-            lambda ws: self.websocketServer.sendAccountsList(ws, self.getAccounts()))
-        self.websocketServer.passwordRequest.connect(self.requestPassword)
-
     def getFileName(self):
         '''Getter for filename property'''
         return self.__fileName
@@ -211,7 +190,7 @@ class SnopfManager(QMainWindow):
     def setFileName(self, fileName):
         '''Setter for filename property'''
         self.__fileName = fileName
-        self.setWindowTitle('Snopf %s' % os.path.basename(self.__fileName))
+        self.setWindowTitle('Snopf %s' % os.path.basename(str(self.__fileName)))
 
     # Filename of currently loaded file
     fileName = property(getFileName, setFileName)
