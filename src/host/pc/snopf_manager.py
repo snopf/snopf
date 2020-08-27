@@ -211,7 +211,7 @@ class SnopfManager(QMainWindow):
     def setFileName(self, fileName):
         '''Setter for filename property'''
         self.__fileName = fileName
-        self.setWindowTitle('Snopf %s' % self.__fileName)
+        self.setWindowTitle('Snopf %s' % os.path.basename(self.__fileName))
 
     # Filename of currently loaded file
     fileName = property(getFileName, setFileName)
