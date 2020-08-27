@@ -43,6 +43,9 @@ class SnopfWebsocketServer(QWebSocketServer):
 
     def listen(self):
         # Start server
+        if self.isListening():
+            logger.info('Already running')
+            return
         success = super().listen(QHostAddress.LocalHost, port=self.port)
         if not success:
             logger.error('Cannot start websocket server')

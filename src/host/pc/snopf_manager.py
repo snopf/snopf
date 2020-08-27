@@ -160,8 +160,6 @@ class SnopfManager(QMainWindow):
         self.websocketServer.accountsRequest.connect(
             lambda ws: self.websocketServer.sendAccountsList(ws, self.getAccounts()))
         self.websocketServer.passwordRequest.connect(self.requestPassword)
-        if self.options['websocket-enabled']:
-            self.websocketServer.listen()
 
     def logException(self, exctype, value, traceback):
         '''Log uncaught execptions and show an info message'''
@@ -285,6 +283,9 @@ class SnopfManager(QMainWindow):
         if len(accountTable):
             self.ui.accountTableView.selectRow(0)
             self.entrySelected(self.ui.accountTableView.currentIndex())
+
+        # Start the websocket server if not already running
+        self.startWebsocketServer()
 
     def entrySelected(self, _index):
         index = self.ui.accountTableView.model().mapToSource(_index)
@@ -548,10 +549,14 @@ class SnopfManager(QMainWindow):
             self.websocketServer.updatePort(self.options['websocket-port'])
             self.websocketServer.updateWhitelist(self.options['websocket-whitelist'])
             if self.options['websocket-enabled']:
-                if not self.websocketServer.isListening():
-                    self.websocketServer.listen()
+                self.startWebsocketServer()
             else:
                 self.websocketServer.close()
+
+    def startWebsocketServer(self):
+        '''Only listen to connections if the option is selected and there is an active account table'''
+        if self.atModel and self.options['websocket-enabled']:
+            self.websocketServer.listen()
 
     def saveOptions(self):
         '''Save current app options to persistent json'''
