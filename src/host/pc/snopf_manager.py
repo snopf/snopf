@@ -145,13 +145,6 @@ class SnopfManager(QMainWindow):
         # Load snopf options file
         self.loadOptions()
 
-        # Load last loaded file if available
-        if self.options['last-filename']:
-            try:
-                self.openAccountTable(self.options['last-filename'])
-            except FileNotFoundError:
-                logger.warning('Last file % s not found, skipping auto load' % lastFileName)
-
         # Init websocket server
         self.websocketServer = SnopfWebsocketServer(self, self.options['websocket-port'],
                                                     self.options['websocket-whitelist'])
@@ -160,6 +153,13 @@ class SnopfManager(QMainWindow):
         self.websocketServer.accountsRequest.connect(
             lambda ws: self.websocketServer.sendAccountsList(ws, self.getAccounts()))
         self.websocketServer.passwordRequest.connect(self.requestPassword)
+
+        # Load last loaded file if available
+        if self.options['last-filename']:
+            try:
+                self.openAccountTable(self.options['last-filename'])
+            except FileNotFoundError:
+                logger.warning('Last file % s not found, skipping auto load' % lastFileName)
 
     def logException(self, exctype, value, traceback):
         '''Log uncaught execptions and show an info message'''
