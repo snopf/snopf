@@ -22,7 +22,7 @@ shiboken2==5.15.0
 six==1.13.0
 smmap==3.0.4
 wcwidth==0.1.8
-websockets==8.1
+websockets==9.1
 zipp==0.6.0
 zope.event==4.4
 zope.interface==5.1.0
